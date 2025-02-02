@@ -12,11 +12,11 @@ Reagent Management Program for chemistry laboratories
 - ペンで記入することで、印刷等が不要
 - 試薬の保管場所の検索機能
 
-#インストール
+# インストール
 0. 前提：Ubuntu, Python 3, Tkinter
 1. 適当な場所にbinをコピーし、パスを通す。
 2. rmp_installを実行
 3. アプリメニューに追加されてるはずです。
 
-#その他
+# その他
 万全を期していますが、著作権・商標権等、問題があればご連絡ください。早急に対応します。
