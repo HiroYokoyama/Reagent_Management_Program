@@ -21,3 +21,6 @@ Reagent Management Program for chemistry laboratories
 
 # その他
 万全を期していますが、著作権・商標権等、問題があればご連絡ください。早急に対応します。
+
+# 画像
+![image](https://github.com/HiroYokoyama/Reagent_Management_Program/blob/main/img/1.png)
