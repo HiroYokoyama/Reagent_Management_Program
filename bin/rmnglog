@@ -1,0 +1,29 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Management day log
+# 書式: rmnglog 試薬ID 質量
+#
+# version 2.5.1 (2021.10.10)
+#####
+
+date=`date "+%Y%m%d"`
+filename=$date".log"
+
+if ! [ -e ~/.rmp-data/other/mnglogs/$filename ] ; then
+    echo "試薬管理質量登録log" >> ~/.rmp-data/other/mnglogs/$filename
+    echo "開始日時：`date`"　>> ~/.rmp-data/other/mnglogs/$filename
+    echo ""　>> ~/.rmp-data/other/mnglogs/$filename
+    echo "試薬ID\t現状の質量[g]"   >> ~/.rmp-data/other/mnglogs/$filename
+    #check rmp server
+    if [ -e  ~/.rmp-data/other/system/server_status ]; then
+        status=`cat ~/.rmp-data/other/system/server_status`
+        if [ $status = "ACTIVE" ]; then
+            chmod 666 ~/.rmp-data/other/mnglogs/$filename
+        fi
+    fi
+fi
+
+echo "$1\t$2"  >> ~/.rmp-data/other/mnglogs/$filename
+

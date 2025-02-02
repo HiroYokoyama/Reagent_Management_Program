@@ -1,0 +1,39 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Summary of the log
+# 書式: rsum 試薬ID
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+id=$1
+echo "--------------------------------------------------"
+echo "\e[34m====試薬ログ要約====\e[0m"
+if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+    echo "試薬がありました(ID: $1)"
+    rmodchk $id
+    echo ""
+    echo "データは以下です"
+    echo ""
+    headtmp=`head -n 1 ~/.rmp-data/data/$id.rmp`
+    reaname="\e[36m`echo $headtmp | cut -d "," -f 2`\e[0m"
+    headbef=`echo $headtmp | cut -d "," -f 1`
+    headaft=`echo $headtmp | cut -d "," -f 3-`
+    echo "$headbef,$reaname,$headaft" | tr "," "\t"
+    echo ""
+    echo ""
+    echo "最近の使用履歴↓"
+    echo ""
+    
+    label="\e[4m\e[1m日付,使用者名,使用前[g],使用後[g],使用量[g],備考\e[0m \n"
+    data=`tail -n3 ~/.rmp-data/data/$id.rmp`
+    echo "$label$data" | column -s, -t
+    echo ""
+else
+    echo "試薬が見つかりませんでした(ID: $1)"
+fi
+
+echo "--------------------------------------------------"

@@ -1,0 +1,38 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Move Reagent
+# 書式: rmove 試薬ID 名前　移動先試薬庫　備考
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+
+echo "--------------------------------------------------"
+echo "\e[34m====試薬移動====\e[0m"
+id=$1
+if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+    echo "試薬がありました(ID: $1)"
+    name=$2
+    newstorage=$3
+    note=$4 
+
+    data=`sed -n 1P ~/.rmp-data/data/$id.rmp`
+    currentstorage=`echo $data | rev | cut -d "," -f 1 | rev | sed -e "s?試薬庫:??g"` 
+    sed -i -e "1s?試薬庫:$currentstorage?試薬庫:$newstorage?" ~/.rmp-data/data/$id.rmp
+    echo "`date "+%Y/%m/%d %H:%M:%S"`,$name,-,-,-,[試薬移動] $currentstorage -> $newstorage (備考:$note)" >> ~/.rmp-data/data/$id.rmp
+
+    greped_data=`grep "$id," ~/.rmp-data/reagent-list.lrmp`
+    newdata=`echo $greped_data | sed -e "s?$currentstorage?$newstorage?g"`
+
+    sed -i -e "s?$greped_data?$newdata?g" ~/.rmp-data/reagent-list.lrmp
+    
+    echo "移動が完了しました($id, 内容: $currentstorage -> $newstorage)"
+    echo ""
+
+else
+    echo "試薬が見つかりませんでした(ID: $1)"
+fi
+echo "--------------------------------------------------"

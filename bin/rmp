@@ -1,0 +1,161 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# MAIN GUI
+# 
+#
+# version OSS 1.0.0 (2024.3.1)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import ttk
+from tkinter import PhotoImage
+from tkinter import messagebox
+
+def runprog(func):
+        reause["state"]=tk.DISABLED
+        reanew["state"]=tk.DISABLED
+        reaother["state"]=tk.DISABLED
+        reaview["state"]=tk.DISABLED
+        reasearch["state"]=tk.DISABLED
+        reamng["state"]=tk.DISABLED
+        mwindow.after(1,func)
+
+def enable_button():
+        mwindow.after(1,enable_buttonp)
+
+def enable_buttonp():
+        reause["state"]=tk.NORMAL
+        reanew["state"]=tk.NORMAL
+        reaother["state"]=tk.NORMAL
+        reaview["state"]=tk.NORMAL
+        reasearch["state"]=tk.NORMAL
+        reamng["state"]=tk.NORMAL
+
+def reausep():
+        #ruse-GUI
+        print("================       ruse       ================")
+        subprocess.call(["ruse-GUI"])
+        enable_button()
+        print("================    ruse_closed   ================")
+        print()
+
+def reanewp():
+        #rnew-GUI
+        print("================       rnew       ================")
+        subprocess.call(["rnew-GUI"])
+        enable_button()
+        print("================    rnew_closed   ================")
+        print()
+    
+def reasearchp():
+        #rsearch-GUI
+        print("================      rsearch     ================")
+        subprocess.call(["rsearch-GUI"])
+        enable_button()
+        print("================  rsearch_closed  ================")
+        print()
+    
+def reaviewp():
+        #rview-GUI
+        print("================       rlog       ================")
+        subprocess.call(["rlog-GUI"])
+        enable_button()
+        print("================   rlog_closed    ================")
+        print()
+    
+def reamanp():
+        #rmpmng-GUI
+        print("================      rmpmng      ================")
+        subprocess.call(["rmpmng-GUI"])
+        enable_button()
+        print("================   rmpmng_closed  ================")
+        print()
+
+def reaotherp():
+        #rexport-GUI
+        print("================       other      ================")
+        subprocess.call(["rmp-other-GUI"])
+        enable_button()
+        print("================   other_closed   ================")
+        print()
+        
+def reamanual():
+        #rmanual-GUI
+        print("================      rmanual     ================")
+        subprocess.call(["rmanual-GUI"])
+        enable_button()
+        print("================  rmanual_closed  ================")
+        print()
+
+def exit_question():
+        question = tk.messagebox.askquestion('アプリケーションの終了','終了してもよろしいですか？', icon='warning')
+        if question == 'yes':
+                mwindow.destroy()
+        
+
+print('Reagent Management Program ver. OSS 1.0.0 (2024/03/01) ©2022 H. Yokoyama')
+print()
+
+#main window
+mwindow = tk.Tk()
+mwindow.title('メインメニュー')
+mwindow.geometry('480x250')
+mwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+mwindow.tk.call('wm', 'iconphoto', mwindow, img)
+
+
+style = ttk.Style()
+style.configure('Main.TButton', font=("System", 17))
+
+reause = ttk.Button(mwindow, text='使用登録', style="Main.TButton", width=15, command=lambda: runprog(reausep))
+reause.bind("<Return>", lambda event: runprog(reausep))
+reause.bind("<KP_Enter>", lambda event: runprog(reausep))
+reause.grid(row=0, column=0, padx=15, pady=15)
+
+reanew =  ttk.Button(mwindow, text='試薬新規登録', style="Main.TButton", width=15, command=lambda: runprog(reanewp))
+reanew.bind("<Return>", lambda event: runprog(reanewp))
+reanew.bind("<KP_Enter>", lambda event: runprog(reanewp))
+reanew.grid(row=0, column=1, padx=15, pady=15)
+
+reaview =  ttk.Button(mwindow, text='使用記録閲覧', style="Main.TButton", width=15, command=lambda: runprog(reaviewp))
+reaview.bind("<Return>", lambda event: runprog(reaviewp))
+reaview.bind("<KP_Enter>", lambda event: runprog(reaviewp))
+reaview.grid(row=1, column=0, padx=15, pady=15)
+
+reasearch =  ttk.Button(mwindow, text='試薬検索', style="Main.TButton", width=15, command=lambda: runprog(reasearchp))
+reasearch.bind("<Return>", lambda event: runprog(reasearchp))
+reasearch.bind("<KP_Enter>", lambda event: runprog(reasearchp))
+reasearch.grid(row=1, column=1, padx=15, pady=15)
+
+reaother = ttk.Button(mwindow, text='その他機能', style="Main.TButton", width=15, command=lambda: runprog(reaotherp))
+reaother.bind("<Return>", lambda event: runprog(reaotherp))
+reaother.bind("<KP_Enter>", lambda event: runprog(reaotherp))
+reaother.grid(row=2, column=0, padx=15, pady=15)
+
+reamng = ttk.Button(mwindow, text='試薬棚卸', style="Main.TButton", width=15, command=lambda: runprog(reamanp))
+reamng.bind("<Return>", lambda event: runprog(reamanp))
+reamng.bind("<KP_Enter>", lambda event: runprog(reamanp))
+reamng.grid(row=2, column=1, padx=15, pady=15)
+
+
+c_lbl = ttk.Label(font=("System",8), text='Reagent Management Program ver. OSS 1.0.0 (2024/03/01) H. Yokoyama')
+c_lbl.place(x=50, y=225)
+
+mwindow.protocol('WM_DELETE_WINDOW', exit_question) 
+
+mwindow.mainloop()
+

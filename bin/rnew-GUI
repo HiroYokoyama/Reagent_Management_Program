@@ -1,0 +1,546 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RNEW GUI
+# 
+#
+# version OSS 1.0.0 (2024.03.01)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+import datetime
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+def boxrnamesearch():
+        home_dir=os.environ['HOME']
+        id=rname_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                amount_box.focus_set()
+                rnamesearch()
+        else:
+                rnamesearch()
+
+def register():
+        #ID発行
+        rname=rname_box.get()
+        amount=amount_box.get()
+        cas=cas_box.get()
+        density=density_box.get()
+        rdate=rdate_box.get()
+        storage=storage_box.get()
+        init_weight=init_weight_box.get()
+        maker=maker_box.get()
+        note=note_box.get()
+
+	
+        if not rname:
+                messagebox.showerror("失敗","試薬名を入力してください")
+                rname_box.focus_set()
+                return
+        else:
+                rname=rname.replace(':', '_')
+                rname=rname.replace(';', '_')
+                rname=rname.replace('\'', '_')
+                rname=rname.replace('\"', '_')
+                rname=rname.replace('\\', '_')
+                rname=rname.replace('?', '？')
+                rname=rname.replace(',', '_')
+                rname=rname.replace('[', '_')
+                rname=rname.replace(']', '_')
+                rname=rname.replace('*', '_')
+                rname=rname.strip()
+ 
+        if not amount:
+                messagebox.showerror("失敗","容量を入力してください")
+                amount_box.focus_set()
+                return
+        else:
+                amount=amount.replace(':', '_')
+                amount=amount.replace(';', '_')
+                amount=amount.replace('\'', '_')
+                amount=amount.replace('\"', '_')
+                amount=amount.replace('\\', '_')
+                amount=amount.replace('?', '？')
+                amount=amount.replace(',', '_')
+                amount=amount.replace('[', '_')
+                amount=amount.replace(']', '_')
+                amount=amount.replace('*', '_')
+                amount=amount.strip()
+
+        if not cas:
+                messagebox.showerror("失敗","CAS RNを入力してください   存在しない場合は「-」を入力")
+                cas_box.focus_set()
+                return
+        elif cas == "-":
+                pass
+        else:
+                cas=cas.replace(':', '_')
+                cas=cas.replace(';', '_')
+                cas=cas.replace('\'', '_')
+                cas=cas.replace('\"', '_')
+                cas=cas.replace('\\', '_')
+                cas=cas.replace('?', '？')
+                cas=cas.replace(',', '_')
+                cas=cas.replace('[', '_')
+                cas=cas.replace(']', '_')
+                cas=cas.strip()
+
+
+                ##CAS check
+
+                #error check
+                cas_dat=cas.split('-')
+
+                try:
+                        int(cas_dat[0])
+                        int(cas_dat[1])
+                        int(cas_dat[2])
+
+                except ValueError:
+                        messagebox.showerror("失敗","CAS RNが不正のようです   (数字を入力してください)")
+                        cas_box.focus_set()
+                        return
+
+                except IndexError:
+                        messagebox.showerror("失敗","CAS RNが不正のようです   (「-」で区切ってください)")
+                        cas_box.focus_set()
+                        return
+
+
+                cas_1st=str(cas_dat[0])
+                cas_2nd=str(cas_dat[1])
+                cas_3rd=int(cas_dat[2])
+                
+                cas_1_list = list(cas_1st)
+                cas_2_list = list(cas_2nd)
+
+                if len(cas_1_list) < 2:
+                        messagebox.showerror("失敗","CAS RNが不正のようです (1つめの桁数)")
+                        cas_box.focus_set()
+                        return
+                elif len(cas_1_list) > 7:
+                        messagebox.showerror("失敗","CAS RNが不正のようです (1つめの桁数)")
+                        cas_box.focus_set()
+                        return
+                elif len(cas_2_list) != 2:
+                        messagebox.showerror("失敗","CAS RNが不正のようです (2つめの桁数)")
+                        cas_box.focus_set()
+                        return
+                elif len(cas_dat[2]) >= 2:
+                        messagebox.showerror("失敗","CAS RNが不正のようです (3つめの桁数)")
+                        cas_box.focus_set()
+                        return                        
+
+                cas_check_list = cas_1_list + cas_2_list
+                cas_list_len=len(cas_check_list)
+                
+                check=0
+                for i in range(cas_list_len):
+                        m=int(cas_list_len)-int(i)
+                        check=check+int(m)*int(cas_check_list[i])
+
+                check_deg = int(check) % 10
+                if int(check_deg) != cas_3rd:
+                        messagebox.showerror("失敗","CAS RNが不正のようです (数字)")
+                        cas_box.focus_set()
+                        return
+
+                
+
+
+        if not density:
+                density="-"
+
+        elif density == "-" :
+                pass
+        else:
+                density=density.replace(':', '_')
+                density=density.replace(';', '_')
+                density=density.replace('\'', '_')
+                density=density.replace('\"', '_')
+                density=density.replace('\\', '_')
+                density=density.replace('?', '？')
+                density=density.replace(',', '_')
+                density=density.strip()
+
+                try:
+                        float(density)
+
+                except ValueError:
+                        messagebox.showerror("失敗","密度が不正のようです (空白または数字を入力してください)")
+                        density_box.focus_set()
+                        return
+
+
+        if not rdate:
+                messagebox.showerror("失敗","入庫日を入力してください")
+                rdate_box.focus_set()
+                return
+        else:
+                rdate=rdate.replace(':', '_')
+                rdate=rdate.replace(';', '_')
+                rdate=rdate.replace('\'', '_')
+                rdate=rdate.replace('\"', '_')
+                rdate=rdate.replace('\\', '_')
+                rdate=rdate.replace('?', '？')
+                rdate=rdate.replace(',', '_')
+                rdate=rdate.replace('[', '_')
+                rdate=rdate.replace(']', '_')
+                rdate=rdate.strip()
+
+        if not storage:
+                messagebox.showerror("失敗","試薬庫を入力してください")
+                storage_box.focus_set()
+                return
+        else:
+                storage=storage.replace(':', '_')
+                storage=storage.replace(';', '_')
+                storage=storage.replace('\'', '_')
+                storage=storage.replace('\"', '_')
+                storage=storage.replace('\\', '_')
+                storage=storage.replace('?', '？')
+                storage=storage.replace(',', '_')
+                storage=storage.replace('[', '_')
+                storage=storage.replace(']', '_')
+                storage=storage.strip()
+
+        if not maker:
+                messagebox.showerror("失敗","メーカー/等級/Lot.を入力してください   ない場合は「-」を入力")
+                maker_box.focus_set()
+                return
+        elif maker == "-" :
+                pass
+        else:
+                maker=maker.replace(':', '_')
+                maker=maker.replace(';', '_')
+                maker=maker.replace('\'', '_')
+                maker=maker.replace('\"', '_')
+                maker=maker.replace('\\', '_')
+                maker=maker.replace(',', '_')
+                maker=maker.strip()
+
+        if not note:
+                note="-"
+        else:
+                note=note.replace(':', '_')
+                note=note.replace(';', '_')
+                note=note.replace(':', '_')
+                note=note.replace(';', '_')
+                note=note.replace('\'', '_')
+                note=note.replace('\"', '_')
+                note=note.replace('\\', '_')
+                note=note.replace('?', '？')
+                note=note.replace(',', '_')
+                note=note.strip()
+
+
+        if not init_weight:
+                messagebox.showerror("失敗","初期質量を入力してください   重量オーバーなどの場合は「-」を入力")
+                init_weight_box.focus_set()
+                return
+        elif init_weight == "-" :
+                pass
+        else:
+                init_weight=init_weight.replace('g', '')
+                init_weight=init_weight.replace(':', '_')
+                init_weight=init_weight.replace(';', '_')
+                init_weight=init_weight.replace('\'', '_')
+                init_weight=init_weight.replace('\"', '_')
+                init_weight=init_weight.replace('\\', '_')
+                init_weight=init_weight.replace('?', '？')
+                init_weight=init_weight.replace(',', '_')
+                init_weight=init_weight.replace('[', '_')
+                init_weight=init_weight.replace(']', '_')
+                init_weight=init_weight.strip()
+                
+                try:
+                        float(init_weight)
+
+                except ValueError:
+                        messagebox.showerror("失敗","初期質量が不正のようです (数字を入力してください)")
+                        init_weight_box.focus_set()
+                        return
+        
+
+        command = ["rnew", str(rname), str(amount), str(cas), str(density), str(rdate), str(storage), str(init_weight), str(note), str(maker)]
+        subprocess.call(command)
+        home_dir=os.environ['HOME']
+        id_path=home_dir+"/.rmp-data/other/system/nextid.old"
+        f = open(id_path, 'r')
+        id=f.read()
+        f.close()
+        print("登録した試薬のIDは[ "+str(id)+" ]です")
+        print("--------------------------------------------------")
+        
+        messagebox.showinfo("ID","IDを発行しました，試薬瓶に記入してください: "+id)
+        messagebox.showinfo("完了","完了しました: "+id)
+
+        rname_box.delete(0, tk.END)
+        amount_box.delete(0, tk.END)
+        cas_box.delete(0, tk.END)
+        density_box.delete(0, tk.END)
+        rdate_box.delete(0, tk.END)
+        storage_box.delete(0, tk.END)
+        init_weight_box.delete(0, tk.END)
+        note_box.delete(0, tk.END)
+        maker_box.delete(0, tk.END)
+        rname_box.focus_set()
+
+def rnamesearch():
+        search=rname_box.get()
+        
+        home_dir=os.environ['HOME']
+        if os.path.exists(home_dir+"/.rmp-data/data/"+search+".rmp"):
+                        print("\n--------------------------------------------------")
+                        print("試薬がありました(ID: "+search+")")
+                        rmp_path=home_dir+"/.rmp-data/data/"+search+".rmp"
+                        rmp_f = open(rmp_path, 'r')
+                        rmp_data = rmp_f.readlines()[0:2]
+                        rmp_f.close()
+                        data_1 = rmp_data[0].strip().split(',')
+                        data_2 = rmp_data[1].strip().split(',')
+                        
+
+                        nrname=data_1[1]
+                        ncas=data_1[3].strip("CAS:")
+                        ndensity=data_2[1]
+                        nnote=data_1[5]
+
+                        rname_box.delete(0, tk.END)
+                        rname_box.insert(0,nrname)
+                        cas_box.delete(0, tk.END)
+                        cas_box.insert(0,ncas)
+                        density_box.delete(0, tk.END)
+                        density_box.insert(0,ndensity)
+                        #note_box.delete(0, tk.END)
+                        #note_box.insert(0,nnote)
+                        print("--------------------------------------------------\n")
+
+        elif os.path.exists(home_dir+"/.rmp-data/data/"+search+".frmp"):
+                        print("\n--------------------------------------------------")
+                        print("試薬がありました(ID: "+search+")")
+                        rmp_path=home_dir+"/.rmp-data/data/"+search+".frmp"
+                        rmp_f = open(rmp_path, 'r')
+                        rmp_data = rmp_f.readlines()[0:2]
+                        rmp_f.close()
+                        data_1 = rmp_data[0].strip().split(',')
+                        data_2 = rmp_data[1].strip().split(',')
+                        
+
+                        nrname=data_1[1]
+                        ncas=data_1[3].strip("CAS:")
+                        ndensity=data_2[1]
+                        nnote=data_1[5]
+
+                        rname_box.delete(0, tk.END)
+                        rname_box.insert(0,nrname)
+                        cas_box.delete(0, tk.END)
+                        cas_box.insert(0,ncas)
+                        density_box.delete(0, tk.END)
+                        density_box.insert(0,ndensity)
+                        #note_box.delete(0, tk.END)
+                        #note_box.insert(0,nnote)
+                        print("--------------------------------------------------\n")
+
+        elif os.path.exists(home_dir+"/.rmp-data/data/finished/"+search+".frmp"):
+                        print("\n--------------------------------------------------")
+                        print("試薬がありました(ID: "+search+")")
+                        rmp_path=home_dir+"/.rmp-data/data/finished/"+search+".frmp"
+                        rmp_f = open(rmp_path, 'r')
+                        rmp_data = rmp_f.readlines()[0:2]
+                        rmp_f.close()
+                        data_1 = rmp_data[0].strip().split(',')
+                        data_2 = rmp_data[1].strip().split(',')
+                        
+
+                        nrname=data_1[1]
+                        ncas=data_1[3].strip("CAS:")
+                        ndensity=data_2[1]
+                        nnote=data_1[5]
+
+                        rname_box.delete(0, tk.END)
+                        rname_box.insert(0,nrname)
+                        cas_box.delete(0, tk.END)
+                        cas_box.insert(0,ncas)
+                        density_box.delete(0, tk.END)
+                        density_box.insert(0,ndensity)
+                        #note_box.delete(0, tk.END)
+                        #note_box.insert(0,nnote)
+                        print("--------------------------------------------------\n")
+        
+        else:
+                        print("\n--------------------------------------------------")
+                        print("試薬がありませんでした(ID: "+search+")")
+                        print("検索します")
+                        command = ["rsearch", str(search), "TRUE"]
+                        subprocess.call(command)
+                        
+
+
+def puttoday():
+        rdate_box.delete(0, tk.END)
+        today=datetime.datetime.now()
+        today=today.strftime("%Y/%m/%d")
+        rdate_box.insert(0, today)
+
+def putgram():
+        amount_box.insert(tk.END, "g")
+
+def putml():
+        amount_box.insert(tk.END, "mL")
+        
+def gekibutsu():
+        note_box.delete(0, tk.END)
+        note_box.insert(0, "医薬用外劇物")
+        
+def dokubutsu():
+        note_box.delete(0, tk.END)
+        note_box.insert(0, "医薬用外毒物")
+        
+#入力ウィンドウ
+rnewwindow = tk.Tk()
+rnewwindow.title('試薬新規登録')
+rnewwindow.geometry('600x500')
+rnewwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rnewwindow.tk.call('wm', 'iconphoto', rnewwindow, img)
+
+
+rname_lbl = tk.Label(font=("System",20), text='試薬名   …………………')
+rname_lbl.place(x=10, y=30)
+rname_box = ttk.Entry(font=("System",20))
+rname_box.place(x=325, y=33, width=200, height=40)
+rname_box.bind("<Return>", lambda event: boxrnamesearch())
+rname_box.bind("<KP_Enter>", lambda event: boxrnamesearch())
+
+load_button = tk.Button(rnewwindow, text='Load', font=("System",10), command=rnamesearch)
+load_button.place(x=530, y=33, width=50, height=40)
+load_button.bind("<Return>", lambda event: rnamesearchm())
+load_button.bind("<KP_Enter>", lambda event: rnamesearch())
+
+amount_lbl = tk.Label(font=("System",20), text='単位あり容量   …………')
+amount_lbl.place(x=10, y=70)
+amount_box = ttk.Entry(font=("System",20))
+amount_box.place(x=325, y=73, width=200, height=40)
+amount_box.bind("<Return>", lambda event: cas_box.focus_set())
+amount_box.bind("<KP_Enter>", lambda event: cas_box.focus_set())
+
+gram_button = tk.Button(rnewwindow, text='g', font=("System",10), command=putgram)
+gram_button.bind("<Return>", lambda event: putgram())
+gram_button.bind("<KP_Enter>", lambda event: putgram())
+gram_button.place(x=530, y=73, width=25, height=40)
+
+ml_button = tk.Button(rnewwindow, text='mL', font=("System",10), command=putml)
+ml_button.bind("<Return>", lambda event: putml())
+ml_button.bind("<KP_Enter>", lambda event: putml())
+ml_button.place(x=555, y=73, width=25, height=40)
+
+cas_lbl = tk.Label(font=("System",20), text='CAS番号    ………………')
+cas_lbl.place(x=10, y=110)
+cas_box = ttk.Entry(font=("System",20))
+cas_box.place(x=325, y=113, width=200, height=40)
+cas_box.bind("<Return>", lambda event: density_box.focus_set())
+cas_box.bind("<KP_Enter>", lambda event: density_box.focus_set())
+
+density_lbl = tk.Label(font=("System",20), text='単位なし密度[g/mL]   …')
+density_lbl.place(x=10, y=150)
+density_box = ttk.Entry(font=("System",20))
+density_box.place(x=325, y=153, width=200, height=40)
+density_box.bind("<Return>", lambda event: rdate_box.focus_set())
+density_box.bind("<KP_Enter>", lambda event: rdate_box.focus_set())
+
+rdate_lbl = tk.Label(font=("System",20), text='入庫日   …………………')
+rdate_lbl.place(x=10, y=190)
+rdate_box = ttk.Entry(font=("System",20))
+rdate_box.place(x=325, y=193, width=200, height=40)
+rdate_box.bind("<Return>", lambda event: storage_box.focus_set())
+rdate_box.bind("<KP_Enter>", lambda event: storage_box.focus_set())
+
+today_button = tk.Button(rnewwindow, text='今日', font=("System",12), command=puttoday)
+today_button.bind("<Return>", lambda event: puttoday())
+today_button.bind("<KP_Enter>", lambda event: puttoday())
+today_button.place(x=530, y=193, width=50, height=40)
+
+storage_lbl = tk.Label(font=("System",20), text='試薬庫   …………………')
+storage_lbl.place(x=10, y=230)
+
+style = ttk.Style()
+style.configure('Main.TCombobox', arrowsize=20)
+
+home_dir=os.environ['HOME']
+srmp_f = open(home_dir+"/.rmp-data/other/shiyakuko.srmp", 'r')
+srmp_data=srmp_f.readlines()
+srmp_f.close()
+srmp_lines=len(srmp_data)
+shiyakuko_data=srmp_data[srmp_lines-1].strip()
+shiyakuko_list = shiyakuko_data.split(',')
+
+storage_box = ttk.Combobox(master=rnewwindow, style="Main.TCombobox", font=("System", 20), values=shiyakuko_list)
+storage_box.place(x=325, y=233, width=200, height=40)
+storage_box.bind("<Return>", lambda event: maker_box.focus_set())
+storage_box.bind("<KP_Enter>", lambda event: maker_box.focus_set())
+
+maker_lbl = tk.Label(font=("System",20), text='メーカー/等級/Lot.     …')
+maker_lbl.place(x=10, y=270)
+maker_box = ttk.Entry(font=("System",20))
+maker_box.place(x=325, y=273, width=200, height=40)
+maker_box.bind("<Return>", lambda event: note_box.focus_set())
+maker_box.bind("<KP_Enter>", lambda event: note_box.focus_set())
+
+note_lbl = tk.Label(font=("System",20), text='試薬備考   ………………')
+note_lbl.place(x=10, y=310)
+note_box = ttk.Entry(font=("System",20))
+note_box.place(x=325, y=313, width=200, height=40)
+note_box.bind("<Return>", lambda event: init_weight_box.focus_set())
+note_box.bind("<KP_Enter>", lambda event: init_weight_box.focus_set())
+
+geki_button = tk.Button(rnewwindow, text='劇', font=("System",12), command=gekibutsu)
+geki_button.bind("<Return>", lambda event: gekibutsu())
+geki_button.bind("<KP_Enter>", lambda event: gekibutsu())
+geki_button.place(x=530, y=313, width=25, height=40)
+
+doku_button = tk.Button(rnewwindow, text='毒', font=("System",12), command=dokubutsu)
+doku_button.bind("<Return>", lambda event: dokubutsu())
+doku_button.bind("<KP_Enter>", lambda event: dokubutsu())
+doku_button.place(x=555, y=313, width=25, height=40)
+
+init_weight_lbl = tk.Label(font=("System",20), text='単位なし初期質量[g]  …')
+init_weight_lbl.place(x=10, y=350)
+init_weight_box = ttk.Entry(font=("System",20))
+init_weight_box.place(x=325, y=353, width=200, height=40)
+
+register_button = tk.Button(rnewwindow, text='登録', font=("System",20), command=register)
+register_button.bind("<Return>", lambda event: register())
+register_button.bind("<KP_Enter>", lambda event: register())
+register_button.place(x=200, y=440, width=200, height=40)
+
+help_button = tk.Button(rnewwindow, text='?', font=("System",12), command=lambda: messagebox.showinfo("Help","●試薬名： 試薬瓶に書いてある名前を入力します （例：酢酸エチル）\n●単位あり容量： 試薬瓶に書いてある容量を入力します （例：500mL）\n●CAS番号： 試薬のCAS登録番号を入力します （例：141-78-6）\n●単位なし密度： 試薬が液体の場合は密度を入力します （例：0.90）\n●入庫日： 試薬が入庫された日付を入力します \n●試薬庫： 試薬を入庫した試薬庫を選択します\n●メーカー/等級/Lot.： 試薬のメーカー，等級，Lot番号を入力します （例：Wako 試薬特級 APG0979）\n●試薬備考： 試薬が毒劇物該当のときに入力します．メモもここに\n●単位なし初期質量： 入庫時の試薬瓶の質量を入力します （例：792）\n\n●Load: 試薬IDを入力して押すとデータを読み出します"))
+help_button.place(x=550, y=450)
+
+load_button.lift()
+gram_button.lift()
+ml_button.lift()
+today_button.lift()
+geki_button.lift()
+doku_button.lift()
+rname_box.focus_set()
+
+
+rnewwindow.bind("<Shift-Return>", lambda event: register())
+
+rnewwindow.mainloop()
+

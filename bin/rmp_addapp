@@ -1,0 +1,28 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Generate Desktop File and install Desktop file
+#
+# version 2.4.1 (2021.8.29)
+#####
+
+
+echo -n $PATH > ~/.rmp-data/other/system/path
+install_path="`cat ~/.rmp-data/other/system/install_path`"
+desktop_file=~/.rmp-data/other/system/rmp.desktop
+icon_path="$install_path""icon/icon.png"
+exe_file="$install_path"rmp_run
+
+echo "[Desktop Entry]" >$desktop_file
+echo "Name=RMP" >>$desktop_file
+echo "Comment=Reagent Management Program" >>$desktop_file
+echo "Terminal=true" >>$desktop_file
+echo "Type=Application" >>$desktop_file
+echo "StartupNotify=false" >>$desktop_file
+echo "Categories=Application" >>$desktop_file
+
+echo "Icon=$icon_path" >> $desktop_file
+echo "Exec=$exe_file" >>  $desktop_file
+cp $desktop_file ~/.local/share/applications/
+

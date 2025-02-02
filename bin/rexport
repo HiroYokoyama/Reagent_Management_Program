@@ -1,0 +1,91 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# export logs
+# 書式: rexport DESTINATION ID/(nothing)
+#
+# version 2.6.3 (2022.08.18)
+#####
+
+echo "--------------------------------------------------"
+echo "\e[34m====試薬データエクスポート====\e[0m"
+
+if [ "$1" = "" ]; then
+ echo "Invalid Argument"
+ exit
+fi
+
+if [ ! "$2" = "" ]; then
+ id=$2
+ if [ ! -d $1/EXPORT ] ; then
+  mkdir $1/EXPORT
+ fi
+
+ if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+  echo "試薬がありました(ID: $id)" 
+  echo "エクスポートを実行します"
+  cd ~/.rmp-data/data/
+  iconv -f utf8 -t cp932 $id.rmp > $1/EXPORT/$id.csv
+  echo "完了しました"
+  echo "--------------------------------------------------"
+ elif [ -e ~/.rmp-data/data/$id.frmp ] ; then
+  echo "試薬がありました(ID: $id)" 
+  echo "エクスポートを実行します"
+  cd ~/.rmp-data/data/
+  iconv -f utf8 -t cp932 $id.frmp > $1/EXPORT/$id.csv
+  echo "完了しました"
+  echo "--------------------------------------------------"
+ elif [ -e ~/.rmp-data/data/finished/$id.frmp ] ; then
+  echo "試薬がありました(ID: $id)" 
+  echo "エクスポートを実行します"
+  cd ~/.rmp-data/data/finished/
+  iconv -f utf8 -t cp932 $id.frmp > $1/EXPORT/$id.csv
+  echo "完了しました"
+  echo "--------------------------------------------------"
+elif [ $id = "list" ] ; then
+  echo "試薬リストのエクスポートを実行します"
+  cd ~/.rmp-data/
+  iconv -f utf8 -t cp932 reagent-list.lrmp > $1/EXPORT/reagent-list.csv
+  echo "完了しました"
+  echo "--------------------------------------------------"
+ else
+  echo "試薬がありませんでした(ID: $id)" 
+  echo "--------------------------------------------------"
+ fi
+ exit
+fi
+ 
+echo "登録が必要なデータのエクスポートを実行します"
+#read -p "本当に実行しますか？（実行なら[Enter]，キャンセルは[Ctrl]+[c]）"
+
+mkdir $1/EXPORT
+cd ~/.rmp-data/data/
+
+for fn in *.rmp
+do
+if [ ! -L $fn ] ; then
+echo "Exporting $fn"
+iconv -f utf8 -t cp932 $fn > $1/EXPORT/${fn%rmp}csv
+rmnglog ${fn%.rmp} "exported"
+fi
+done
+
+ls ./*.frmp > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    :
+else
+    rmnglog "--- 以下終了試薬 ---"
+    for fn in *.frmp
+    do
+        echo "Exporting $fn"
+        iconv -f utf8 -t cp932 $fn > $1/EXPORT/${fn%.frmp}_fin.csv
+        rmnglog ${fn%.frmp} "exported"
+    done
+fi
+
+cd ../
+iconv -f utf8 -t cp932 reagent-list.lrmp > $1/EXPORT/reagent-list.csv
+
+echo "完了しました"
+echo "--------------------------------------------------"

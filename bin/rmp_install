@@ -1,0 +1,59 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Install database
+#
+# version OSS 1.0.0 (2024.3.1)
+#####
+
+echo "Reagent Manage Program データベースをインストールします"
+#フォルダー確認
+if [ -d ~/.rmp-data/ ] ; then
+echo "データが存在しています．インストール先パスの更新だけ行います．"
+echo -n `which rmp_install |  sed -e 's/rmp_install//g'`  > ~/.rmp-data/other/system/install_path
+rmp_addapp
+unlink ~/.rmp-data/other/rmp_tools/1.RMP名前・試薬庫リスト変更/1.名前リストを変更
+unlink ~/.rmp-data/other/rmp_tools/1.RMP名前・試薬庫リスト変更/2.試薬庫リストを変更
+unlink ~/.rmp-data/other/rmp_tools/2.試薬管理の日のログ閲覧/1.ログ一覧
+ln -s ~/.rmp-data/other/namelist.nrmp ~/.rmp-data/other/rmp_tools/1.RMP名前・試薬庫リスト変更/1.名前リストを変更
+ln -s ~/.rmp-data/other/shiyakuko.srmp ~/.rmp-data/other/rmp_tools/1.RMP名前・試薬庫リスト変更/2.試薬庫リストを変更
+ln -s ~/.rmp-data/other/mnglogs ~/.rmp-data/other/rmp_tools/2.試薬管理の日のログ閲覧/1.ログ一覧
+echo "更新完了"
+exit
+fi
+
+#dir作成
+mkdir ~/.rmp-data
+mkdir ~/.rmp-data/data/
+mkdir ~/.rmp-data/other/
+mkdir ~/.rmp-data/data/finished/
+mkdir ~/.rmp-data/data/deleted/
+mkdir  ~/.rmp-data/other/system/
+mkdir ~/.rmp-data/other/mnglogs/
+mkdir ~/.rmp-data/other/outing/
+#試薬番号登録
+echo -n 00001 > ~/.rmp-data/other/system/nextid
+#テストデータ作成
+echo "ID:00000,TEST REAGENT,容量:500g,CAS:000-00-0,入庫日:9999/99/99,NOTE,試薬庫:試薬庫X" >  ~/.rmp-data/data/00000.rmp
+echo "d=,9,g/mL" >>  ~/.rmp-data/data/00000.rmp
+echo "" >>  ~/.rmp-data/data/00000.rmp
+echo "日付,使用者名,使用前[g],使用後[g],使用量[g],備考"  >>  ~/.rmp-data/data/00000.rmp
+echo "9999/99/99 99:99:99,TEST1,600,500,100," >>  ~/.rmp-data/data/00000.rmp
+echo "9999/99/99 99:99:99,TEST2,500,400,100," >>  ~/.rmp-data/data/00000.rmp
+echo "9999/99/99 99:99:99,TEST3,400,300,100," >>  ~/.rmp-data/data/00000.rmp
+#試薬リスト作成
+echo "RMP REAGENT LIST" > ~/.rmp-data/reagent-list.lrmp
+echo "" >> ~/.rmp-data/reagent-list.lrmp
+echo "ID,NAME,CAS RN,入庫日,試薬庫"  >> ~/.rmp-data/reagent-list.lrmp
+echo "00000,TEST REAGENT,000-00-0,9999/99/99,試薬庫X"  >> ~/.rmp-data/reagent-list.lrmp
+#試薬庫リスト・名前リスト作成
+rmp_shiyakuko_generate
+rmp_namelist_generate
+#installパス出力
+echo -n `which rmp_install |  sed -e 's/rmp_install//g'`  > ~/.rmp-data/other/system/install_path
+#アプリケーション一覧に登録
+rmp_addapp
+
+echo "インストール完了"
+

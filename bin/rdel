@@ -1,0 +1,49 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# 試薬間違え登録用抹消　コマンドラインツール
+# 書式: rdel 試薬ID
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+echo "--------------------------------------------------"
+echo "\e[34m====試薬抹消(ミス登録時用)====\e[0m"
+
+id=$1
+
+rsum $id
+echo ""
+echo -n "試薬抹消? [y/N]: "
+read ANS
+
+case $ANS in
+  [Yy]* )
+    if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+        echo "試薬がありました(ID: $1)"
+
+
+        greped_data=`grep "$id," ~/.rmp-data/reagent-list.lrmp`
+
+        sed -i -e "s?$greped_data??g" ~/.rmp-data/reagent-list.lrmp
+
+        echo "`date "+%Y/%m/%d %H:%M:%S"`,-,-,-,-,`echo "[試薬抹消]"`" >> ~/.rmp-data/data/$id.rmp
+        mv ~/.rmp-data/data/$id.rmp ~/.rmp-data/data/deleted/$id.drmp
+
+        echo "登録抹消が完了しました(ID: $id)"
+
+
+    else
+        echo "試薬が見つかりませんでした(ID: $1)"
+    fi
+    ;;
+  * )
+    echo "キャンセルしました"
+    ;;
+esac
+
+
+
+echo "--------------------------------------------------"

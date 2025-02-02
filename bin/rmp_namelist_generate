@@ -1,0 +1,17 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# 名前リスト作成、汎用版
+#
+# version 2.4.5 (2021.9.4)
+#####
+
+echo "RMP 名前リスト" > ~/.rmp-data/other/namelist.nrmp
+echo "研究室：" >> ~/.rmp-data/other/namelist.nrmp
+echo "" >> ~/.rmp-data/other/namelist.nrmp
+echo "TEST" >> ~/.rmp-data/other/namelist.nrmp
+echo "User1,User2,User3,User4,User5" >> ~/.rmp-data/other/namelist.nrmp
+
+
+

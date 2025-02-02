@@ -1,0 +1,519 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RUSE GUI
+# 
+#
+# version 2.6.2 (2021.07.07)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+def calcused():
+
+        aft=after_box.get()
+        bef=before_box.get()
+        
+        if not bef:
+                bef=0
+        
+        if not aft:
+                aft=0
+
+        try:
+                float(aft)
+                float(bef)
+
+        except ValueError:
+                messagebox.showerror("計算失敗","使用前と使用後は数字を入力してください")
+                before_box.focus_set()
+                return
+        
+
+                
+        aft=float(aft)
+        bef=float(bef)
+
+        used_val= bef - aft
+        used_val=round(used_val,2)
+        used_box.delete(0, tk.END)
+        used_box.insert(0, used_val)
+
+def searchp():
+        id=id_box.get()
+	
+        home_dir=os.environ['HOME']
+        if os.path.exists(home_dir+"/.rmp-data/other/outing/"+id+".ormp"):
+        #持ち出されている場合 読み出し
+                  print("--------------------------------------------------")
+                  print("持出データがありました(ID: "+id+")")
+                  ormp_f2 = open(home_dir+"/.rmp-data/other/outing/"+id+".ormp", 'r')
+                  mochidashi_data = ormp_f2.read().split(',')
+                  ormp_f2.close()
+                  name_box.delete(0, tk.END)
+                  name_box.insert(0, mochidashi_data[1])
+                  before_box.delete(0, tk.END)
+                  before_box.insert(0, mochidashi_data[2])
+                  after_box.focus_set()
+        else:
+                  print("--------------------------------------------------")
+                  print("持出データがありませんでした(ID: "+id+")")
+	
+	
+
+        command = ["rsum", str(id)]
+        subprocess.call(command)
+
+def finishp():
+        info_box.delete(0, tk.END)
+        global fin
+        fin=False
+        register_button['bg']=origin_color
+        question = tk.messagebox.askquestion('試薬の終了','本当に空ですか？ 今後一切使用登録できなくなります．', icon='warning')
+        if question == 'yes':
+                fin=True
+                register_button['bg']='#f0e68c'
+                info_box.insert(0, "[終了]")
+                messagebox.showinfo("終了指定完了","登録を押すと試薬を終了します．なお，備考を消しても解除されないので，取り消しはウィンドウを閉じてください")
+        
+def mochidaship():
+
+        id=id_box.get()
+        name=name_box.get()
+        before=before_box.get()
+
+        if not id:
+                messagebox.showerror("持出登録失敗","試薬IDを入力してください")
+                id_box.focus_set()
+                return
+        
+        if not name:
+                messagebox.showerror("持出登録失敗","名前を入力してください")
+                name_box.focus_set()
+                return
+        else:
+                name=name.replace(':', '_')
+                name=name.replace(';', '_')
+                name=name.replace('\'', '_')
+                name=name.replace('\"', '_')
+                name=name.replace('\\', '_')
+                name=name.replace('?', '？')
+                name=name.replace(',', '_')
+                name=name.replace('[', '_')
+                name=name.replace(']', '_')
+                name=name.replace('*', '_')
+                name=name.strip()
+
+
+
+        if not before:
+                messagebox.showerror("持出登録失敗","使用前を入力してください")
+                before_box.focus_set()
+                return
+        else:
+                before=before.replace(':', '_')
+                before=before.replace(';', '_')
+                before=before.replace('\'', '_')
+                before=before.replace('\"', '_')
+                before=before.replace('\\', '_')
+                before=before.replace('?', '？')
+                before=before.replace(',', '_')
+                before=before.replace('[', '_')
+                before=before.replace(']', '_')
+                before=before.replace('*', '_')
+                before=before.replace('g', '')
+                before=before.strip()
+        
+        home_dir=os.environ['HOME']
+
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                reagent_found=True
+        else:
+                reagent_found=False
+        
+               
+  
+        if reagent_found == True:
+                if os.path.exists(home_dir+"/.rmp-data/other/outing/"+id+".ormp"):
+                        os.remove(home_dir+"/.rmp-data/other/outing/"+id+".ormp")
+
+                ormp_f = open(home_dir+"/.rmp-data/other/outing/"+id+".ormp", 'w')
+                ormp_f.write(id+","+name+","+before) 
+                ormp_f.close()
+                print("--------------------------------------------------")
+                print("持出登録完了(ID: "+id+")")
+                print("--------------------------------------------------")
+                messagebox.showinfo("完了","持ち出し登録しました")
+                id_box.delete(0, tk.END)
+                name_box.delete(0, tk.END)
+                before_box.delete(0, tk.END)
+                after_box.delete(0, tk.END)
+                used_box.delete(0, tk.END)
+                info_box.delete(0, tk.END)
+                global fin
+                fin=False
+                register_button['bg']=origin_color
+                id_box.focus_set()
+
+        elif reagent_found == False:
+                messagebox.showerror("持出登録失敗","試薬が見つかりませんでした")
+
+def boxsearchp():
+        #move focus and search
+        home_dir=os.environ['HOME']
+        id=id_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                name_box.focus_set()
+                searchp()
+        else:
+                searchp()
+
+def boxcalcused():
+        #move focus and calc
+        used_box.focus_set()
+        calcused()
+
+def readbef():
+        #read the data of Before
+        home_dir=os.environ['HOME']
+        id=id_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                befdatapath = home_dir+"/.rmp-data/data/"+id+".rmp"
+                befdatafile = open(befdatapath, 'r')
+                befdata = befdatafile.readlines()
+                befnum = "-"
+                n = 0
+                while befnum == "-":
+                        n = n-1
+                        befnum =  befdata[n].split(',')[3].strip()
+                
+                befdatafile.close()
+                before_box.delete(0, tk.END)
+                before_box.insert(0, befnum)
+                if not name_box.get():
+                        name_box.focus_set()
+                else:
+                        after_box.focus_set()
+                
+        else:
+                print("試薬が見つかりませんでした")
+                print("")
+                id_box.focus_set()
+
+
+def registeruse():
+        #データ入力
+       
+        if 'fin' in globals():
+                pass
+        else:
+                global fin
+                fin=False
+                register_button['bg']=origin_color
+
+        id=id_box.get()
+        name=name_box.get()
+        before=before_box.get()
+        after=after_box.get()
+        used=used_box.get()
+        info=info_box.get()
+
+
+        if not id:
+                messagebox.showerror("失敗","試薬IDを入力してください")
+                id_box.focus_set()
+                return
+
+        home_dir=os.environ['HOME']
+        if fin == True and os.path.islink(home_dir+"/.rmp-data/data/"+id+".rmp") == True:
+                messagebox.showerror("失敗","終了するには正式な試薬IDを入力してください")
+                id_box.focus_set()
+                return
+
+        if not name:
+                messagebox.showerror("失敗","名前を入力してください")
+                name_box.focus_set()
+                return
+        else:
+                name=name.replace(':', '_')
+                name=name.replace(';', '_')
+                name=name.replace('\'', '_')
+                name=name.replace('\"', '_')
+                name=name.replace('\\', '_')
+                name=name.replace('?', '？')
+                name=name.replace(',', '_')
+                name=name.replace('[', '_')
+                name=name.replace(']', '_')
+                name=name.replace('*', '_')
+                name=name.strip()
+
+        if not before:
+                messagebox.showerror("失敗","使用前を入力してください．ない場合は「-」を入力")
+                before_box.focus_set()
+                return
+        elif before == "-":
+                pass
+        else:
+                before=before.replace(':', '_')
+                before=before.replace(';', '_')
+                before=before.replace('\'', '_')
+                before=before.replace('\"', '_')
+                before=before.replace('\\', '_')
+                before=before.replace(',', '_')
+                before=before.replace('?', '？')
+                before=before.replace('[', '_')
+                before=before.replace(']', '_')
+                before=before.replace('*', '_')
+                before=before.replace('g', '')
+                before=before.strip()
+
+                try:
+                        float(before)
+
+                except ValueError:
+                        messagebox.showerror("失敗","使用前が不正のようです (数字を入力してください)")
+                        before_box.focus_set()
+                        return
+
+        if not after:
+                messagebox.showerror("失敗","使用後を入力してください．ない場合は「-」を入力")
+                after_box.focus_set()
+                return
+        elif after == "-":
+                pass
+        else:
+                after=after.replace(':', '_')
+                after=after.replace(';', '_')
+                after=after.replace('\'', '_')
+                after=after.replace('\"', '_')
+                after=after.replace('\\', '_')
+                after=after.replace(',', '_')
+                after=after.replace('?', '？')
+                after=after.replace('g', '')
+                after=after.replace('[', '_')
+                after=after.replace(']', '_')
+                after=after.replace('*', '_')
+                after=after.strip()
+
+                try:
+                        float(after)
+
+                except ValueError:
+                        messagebox.showerror("失敗","使用後が不正のようです (数字を入力してください)")
+                        after_box.focus_set()
+                        return
+
+        if not used:
+                messagebox.showerror("失敗","使用量を入力してください．ない場合は「-」を入力")
+                used_box.focus_set()
+                return
+        elif used == "-":
+                pass
+        else:
+                used=used.replace(':', '_')
+                used=used.replace(';', '_')
+                used=used.replace('\'', '_')
+                used=used.replace('\"', '_')
+                used=used.replace('\\', '_')
+                used=used.replace(',', '_')
+                used=used.replace('?', '？')
+                used=used.replace('g', '')
+                used=used.replace('[', '_')
+                used=used.replace(']', '_')
+                used=used.replace('*', '_')
+                used=used.strip()
+
+                try:
+                        float(used)
+
+                except ValueError:
+                        messagebox.showerror("失敗","使用量が不正のようです (数字を入力してください)")
+                        used_box.focus_set()
+                        return
+
+        if not info:
+                info="-"
+        elif fin == True:
+                info=info.replace(':', '_')
+                info=info.replace(';', '_')
+                info=info.replace('\'', '_')
+                info=info.replace('\"', '_')
+                info=info.replace('\\', '_')
+                info=info.replace('?', '？')
+                info=info.replace(',', '_')
+                info=info.replace('*', '_')
+                info=info.strip()
+        else:
+                info=info.replace(':', '_')
+                info=info.replace(';', '_')
+                info=info.replace('\'', '_')
+                info=info.replace('\"', '_')
+                info=info.replace('\\', '_')
+                info=info.replace('?', '？')
+                info=info.replace(',', '_')
+                info=info.replace('[', '_')
+                info=info.replace(']', '_')
+                info=info.replace('*', '_')
+                info=info.strip()
+
+
+        command = ["ruse", str(id), str(name), str(before), str(after), str(used), str(info)]
+        subprocess.call(command)
+
+        home_dir=os.environ['HOME']
+
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                reagent_found=True
+        else:
+                reagent_found=False
+
+
+
+        if fin == True:
+                command2 = ["rfin", str(id)]
+                subprocess.call(command2)
+                fin=False
+                register_button['bg']=origin_color
+                info_box.delete(0, tk.END)
+
+        
+        if reagent_found==True:
+                messagebox.showinfo("完了","完了しました")
+                id_box.delete(0, tk.END)
+                name_box.delete(0, tk.END)
+                before_box.delete(0, tk.END)
+                after_box.delete(0, tk.END)
+                used_box.delete(0, tk.END)
+                info_box.delete(0, tk.END)
+                id_box.focus_set()
+                if os.path.exists(home_dir+"/.rmp-data/other/outing/"+id+".ormp"):
+                        os.remove(home_dir+"/.rmp-data/other/outing/"+id+".ormp")
+        else:
+                messagebox.showerror("失敗","試薬が見つかりませんでした")
+                id_box.focus_set()
+
+
+
+             
+
+        
+#入力ウィンドウ
+
+
+rusewindow = tk.Tk()
+rusewindow.title('使用登録')
+rusewindow.geometry('600x500')
+rusewindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rusewindow.tk.call('wm', 'iconphoto', rusewindow, img)
+
+
+
+id_lbl = tk.Label(font=("System",20), text='試薬ID   …………………')
+id_lbl.place(x=10, y=30)
+id_box = ttk.Entry(font=("System",20))
+id_box.bind("<Return>", lambda event: boxsearchp())
+id_box.bind("<KP_Enter>", lambda event: boxsearchp())
+id_box.place(x=325, y=33, width=200, height=40)
+
+idsearch_button = tk.Button(rusewindow, text='検索', font=("System",12), command=searchp)
+idsearch_button.bind("<Return>", lambda event: searchp())
+idsearch_button.bind("<KP_Enter>", lambda event: searchp())
+idsearch_button.place(x=530, y=33, width=50, height=40)
+
+home_dir=os.environ['HOME']
+nrmp_f = open(home_dir+"/.rmp-data/other/namelist.nrmp", 'r')
+nrmp_data=nrmp_f.readlines()
+nrmp_f.close()
+nrmp_lines=len(nrmp_data)
+namelist_data=nrmp_data[nrmp_lines-1].strip()
+namelist = namelist_data.split(',')
+
+name_lbl = tk.Label(font=("System",20), text='使用者名   ………………')
+name_lbl.place(x=10, y=70)
+style = ttk.Style()
+style.configure('Main.TCombobox', arrowsize=20)
+name_box = ttk.Combobox(master=rusewindow, style="Main.TCombobox", font=("System", 20), values=namelist)
+name_box.bind("<Return>", lambda event: before_box.focus_set())
+name_box.bind("<KP_Enter>", lambda event: before_box.focus_set())
+name_box.place(x=325, y=73, width=200, height=40)
+
+before_lbl = tk.Label(font=("System",20), text='単位なし使用前[g]  ……')
+before_lbl.place(x=10, y=110)
+before_box = ttk.Entry(font=("System",20))
+before_box.bind("<Return>", lambda event: after_box.focus_set())
+before_box.bind("<KP_Enter>", lambda event: after_box.focus_set())
+before_box.place(x=325, y=113, width=200, height=40)
+
+mochidashi_button = tk.Button(rusewindow, text='持出', font=("System",12), command=mochidaship)
+mochidashi_button.bind("<Return>", lambda event: mochidaship())
+mochidashi_button.bind("<KP_Enter>", lambda event: mochidaship())
+mochidashi_button.place(x=530, y=113, width=50, height=40)
+
+after_lbl = tk.Label(font=("System",20), text='単位なし使用後[g]  ……')
+after_lbl.place(x=10, y=150)
+after_box = ttk.Entry(font=("System",20))
+after_box.bind("<Return>", lambda event: boxcalcused())
+after_box.bind("<KP_Enter>", lambda event: boxcalcused())
+after_box.place(x=325, y=153, width=200, height=40)
+
+used_lbl = tk.Label(font=("System",20), text='単位なし使用量[g]  ……')
+used_lbl.place(x=10, y=190)
+used_box = ttk.Entry(font=("System",20))
+used_box.bind("<Return>", lambda event: info_box.focus_set())
+used_box.bind("<KP_Enter>", lambda event: info_box.focus_set())
+used_box.place(x=325, y=193, width=200, height=40)
+
+calc_button = tk.Button(rusewindow, text='計算', font=("System",12), command=calcused)
+calc_button.bind("<Return>", lambda event: calcused())
+calc_button.bind("<KP_Enter>", lambda event: calcused())
+calc_button.place(x=530, y=193, width=50, height=40)
+
+info_lbl = tk.Label(font=("System",20), text='備考   ……………………')
+info_lbl.place(x=10, y=230)
+info_box = ttk.Entry(font=("System",20))
+info_box.place(x=325, y=233, width=200, height=40)
+
+fin_button = tk.Button(rusewindow, text='終了', font=("System",12), fg='#ff0000', bg='#f0e68c', command=finishp)
+fin_button.place(x=530, y=233, width=50, height=40)
+
+
+register_button = tk.Button(rusewindow, text='登録', font=("System",20), command=registeruse)
+register_button.bind("<Return>", lambda event: registeruse())
+register_button.bind("<KP_Enter>", lambda event: registeruse())
+register_button.place(x=200, y=440, width=200, height=40)
+
+help_button = tk.Button(rusewindow, text='?', font=("System",12), command=lambda: messagebox.showinfo("Help","●試薬ID： 試薬のIDを入力します\n●使用者名： 使用者の名前を選択/入力します\n●単位なし使用前： 使用前の試薬瓶の質量を入力します\n●単位なし使用後： 使用後の試薬瓶の質量を入力します\n●単位なし使用量： 試薬の使用量を入力します（ボタンで計算可能） \n●備考： 必要なときにメモを入力します\n\n●検索： 試薬の要約を確認できます\n●持出： 試薬の使用前質量を記録します(Alt-Enter)\n●計算： 使用量を計算します\n●終了： 試薬が空になったら押して登録します\n●登録： データを登録します(Shift-Enter)"))
+help_button.place(x=550, y=450)
+
+idsearch_button.lift()
+mochidashi_button.lift()
+calc_button.lift()
+fin_button.lift()
+
+id_box.focus_set()
+
+rusewindow.bind("<Alt-Return>", lambda event: mochidaship())
+rusewindow.bind("<Shift-Return>", lambda event: registeruse())
+
+origin_color = register_button.cget("bg")
+
+rusewindow.bind("<Control-r>", lambda event: readbef())
+
+rusewindow.mainloop()
+

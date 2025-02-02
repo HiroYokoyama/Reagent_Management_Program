@@ -1,0 +1,17 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Use Reagent for manual edit
+# 書式: rusemanu 試薬ID 使用者名 備考
+#
+# version 2.4.7 (2021.9.8)
+#####
+
+
+id=$1
+name=$2
+info=$3
+echo "`date "+%Y/%m/%d %H:%M:%S"`,$name,-,-,-,$info" >> ~/.rmp-data/data/$id.rmp
+
+

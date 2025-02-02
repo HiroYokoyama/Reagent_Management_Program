@@ -1,0 +1,31 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Search Reagent
+# 書式: rsearch "キーワード" "終了試薬を含めるか(TRUE/FALSE)"
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+echo "--------------------------------------------------"
+echo ""
+echo "\e[34m====検索結果($1)====\e[0m"
+echo ""
+label="\e[4m\e[1m試薬ID,試薬名,CAS,入庫日,試薬庫\e[0m \n"
+
+if [ -z "$1" ] && [ $2 = "TRUE" ] ; then
+    data=`tail +4 ~/.rmp-data/reagent-list.lrmp`
+elif [ -z "$1" ] && [ $2 = "FALSE" ] ; then
+    data=`tail +4 ~/.rmp-data/reagent-list.lrmp | grep -v "\[9m"`
+elif [ -n "$1" ] && [ $2 = "TRUE" ] ; then
+    data=`cat ~/.rmp-data/reagent-list.lrmp | grep -i "$1"`
+elif [ -n "$1" ] && [ $2 = "FALSE" ] ; then
+    data=`cat ~/.rmp-data/reagent-list.lrmp | grep -i "$1" | grep -v "\[9m"`
+fi
+
+
+echo "$label$data" | column -s, -t
+echo ""
+echo "--------------------------------------------------"

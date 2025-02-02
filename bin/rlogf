@@ -1,0 +1,44 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# View the log
+# 書式: rlog 試薬ID
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+id=$1
+echo "--------------------------------------------------"
+echo "\e[34m====終了済み試薬ログ閲覧====\e[0m"
+if [ -e ~/.rmp-data/data/$id.frmp ] ; then
+    echo "試薬がありました(ID: $id)"
+    echo ""
+    echo "データは以下です"
+    echo ""
+    head -n 2 ~/.rmp-data/data/$id.frmp | column -s, -t
+    echo ""
+    label="\e[4m\e[1m日付,使用者名,使用前[g],使用後[g],使用量[g],備考\e[0m \n"
+    data=`tail -n +5 ~/.rmp-data/data/$id.frmp`
+    echo "$label$data" | column -s, -t
+    echo ""
+    
+
+elif [ -e ~/.rmp-data/data/finished/$id.frmp ] ; then
+    echo "試薬がありました(ID: $id)"
+    echo ""
+    echo "データは以下です"
+    echo ""
+    head -n 2 ~/.rmp-data/data/finished/$id.frmp | column -s, -t
+    echo ""
+    label="\e[4m\e[1m日付,使用者名,使用前[g],使用後[g],使用量[g],備考\e[0m \n"
+    data=`tail -n +5 ~/.rmp-data/data/finished/$id.frmp`
+    echo "$label$data" | column -s, -t
+    echo ""
+
+else
+    echo "試薬が見つかりませんでした(ID: $id)"
+fi
+
+echo "--------------------------------------------------"

@@ -1,0 +1,48 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# AUTOBACKUP TOOL
+# 書式: rmpbackup
+#
+# version 2.4.5 (2021.9.4)
+#####
+
+
+##!!!!!!!!以下の変数に格納してください!!!!!!!!!!!!!!!
+
+#バックパック先
+backup_dir=~
+
+#バックアップ世代数
+backup_num=5
+
+##!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+if ! [ -d $backup_dir/RMP-BACKUP ] ; then
+mkdir $backup_dir/RMP-BACKUP
+fi
+
+if [ -d $backup_dir/RMP-BACKUP/BACKUP_$backup_num ] ; then
+rm -r $backup_dir/RMP-BACKUP/BACKUP_$backup_num
+fi
+
+mv_num=$(($backup_num-1))
+
+for i in `seq $mv_num -1 1`
+do
+n=$(($i+1))
+if [ -d $backup_dir/RMP-BACKUP/BACKUP_$i ] ; then
+mv -T $backup_dir/RMP-BACKUP/BACKUP_$i $backup_dir/RMP-BACKUP/BACKUP_$n
+fi
+done
+
+
+mkdir $backup_dir/RMP-BACKUP/BACKUP_1
+echo "BACKUP DATE: `date`" > $backup_dir/RMP-BACKUP/BACKUP_1/backup.log
+cd ~/
+tar -zcvf rmp-backup.tar.gz .rmp-data  >> $backup_dir/RMP-BACKUP/BACKUP_1/backup.log
+mv rmp-backup.tar.gz $backup_dir/RMP-BACKUP/BACKUP_1
+echo "BACKUP COMPLETED!" >> $backup_dir/RMP-BACKUP/BACKUP_1/backup.log

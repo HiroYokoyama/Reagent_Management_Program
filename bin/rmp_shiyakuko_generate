@@ -1,0 +1,17 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# 試薬庫リスト作成、汎用版
+#
+# version 2.4.5 (2021.9.4)
+#####
+
+
+echo "RMP 試薬庫リスト" > ~/.rmp-data/other/shiyakuko.srmp
+echo "研究室：" >> ~/.rmp-data/other/shiyakuko.srmp
+echo "" >> ~/.rmp-data/other/shiyakuko.srmp
+echo "TEST" >> ~/.rmp-data/other/shiyakuko.srmp
+echo "Storage1,Storage2,Storage3,Storage4,Storage5" >> ~/.rmp-data/other/shiyakuko.srmp
+
+

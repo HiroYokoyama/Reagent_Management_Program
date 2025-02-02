@@ -1,0 +1,33 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Detect unauthorized modify
+# 書式: rmodchk 試薬ID
+#
+# version 2.4.8 (2021.9.15)
+#####
+
+id=$1
+
+if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+file_mod_date=`date "+%s" -r ~/.rmp-data/data/$id.rmp`
+last_stamp=`tail -n 1 ~/.rmp-data/data/$id.rmp | cut -d ',' -f 1`
+last_date=`date "+%s" --date "$last_stamp"`
+diffe=$((file_mod_date-last_date))
+
+if [ $diffe -gt 5 ] ; then
+   file_mod_date2=`date "+%Y/%m/%d %H:%M:%S" -r ~/.rmp-data/data/$id.rmp`
+   echo "`date "+%Y/%m/%d %H:%M:%S"`,RMP-System,-,-,-,Warning：ファイルが変更された可能性あり(変更：$file_mod_date2)" >> ~/.rmp-data/data/$id.rmp 
+   echo "Warning：ファイルが変更された可能性があります(変更日時：$file_mod_date2)"
+   echo ""
+fi
+
+if [ $diffe -lt -5 ] ; then
+   file_mod_date2=`date "+%Y/%m/%d %H:%M:%S" -r ~/.rmp-data/data/$id.rmp`
+   echo "`date "+%Y/%m/%d %H:%M:%S"`,RMP-System,-,-,-,Warning：ファイルが変更された可能性あり(変更：$file_mod_date2)" >> ~/.rmp-data/data/$id.rmp 
+   echo "Warning：ファイルが変更された可能性があります(変更日時：$file_mod_date2)"
+   echo ""
+fi
+
+fi

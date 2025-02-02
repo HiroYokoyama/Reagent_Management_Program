@@ -1,0 +1,188 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Edit Data Manualy
+# 
+#
+# version 2.6.3 (2022.08.18)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+
+def searchp():
+        id=id_box.get()
+
+        command = ["rsum", str(id)]
+        subprocess.call(command)
+
+def boxsearchp():
+        #move focus and search
+        home_dir=os.environ['HOME']
+        id=id_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                name_box.focus_set()
+                searchp()
+        elif id=="list":
+                name_box.focus_set()
+        else:
+                searchp()
+
+def execp():
+        #データ入力
+        id=id_box.get()
+        name=name_box.get()
+        reason=reason_box.get()
+
+            
+        if not id:
+                messagebox.showerror("失敗","試薬IDを入力してください")
+                id_box.focus_set()
+                return
+        
+        home_dir=os.environ['HOME']
+        if os.path.islink(home_dir+"/.rmp-data/data/"+id+".rmp") == True:
+                messagebox.showerror("失敗","編集するには正式な試薬IDを入力してください")
+                id_box.focus_set()
+                return
+        
+        if not name:
+                if not id=="list":
+                        messagebox.showerror("失敗","名前を入力してください")
+                        name_box.focus_set()
+                        return
+        else:
+                name=name.replace(':', '_')
+                name=name.replace(';', '_')
+                name=name.replace('\'', '_')
+                name=name.replace('\"', '_')
+                name=name.replace(',', '_')
+                name=name.replace('\\', '_')
+                name=name.replace('?', '？')
+                name=name.replace(',', '_')
+
+        if not reason:
+                if not id=="list":
+                        messagebox.showerror("失敗","変更点と理由を入力してください")
+                        reason_box.focus_set()
+                        return
+        else:
+                reason=reason.replace(':', '_')
+                reason=reason.replace(';', '_')
+                reason=reason.replace('\'', '_')
+                reason=reason.replace('\"', '_')
+                reason=reason.replace(',', '_')
+                reason=reason.replace('\\', '_')
+                reason=reason.replace('?', '？')
+                reason=reason.replace(',', '_')
+                
+        question = tk.messagebox.askquestion('手動変更','本当に実行しますか？ すべて記録が残ります', icon='warning')
+        
+        if question == 'no':
+                return
+
+
+        
+        home_dir=os.environ['HOME']
+
+        if id == "list":
+                editpath=home_dir+"/.rmp-data/reagent-list.lrmp"
+                command = ["gedit", "-s", editpath]
+                subprocess.call(command)
+                messagebox.showinfo("完了","完了しました")
+                id_box.delete(0, tk.END)
+                name_box.delete(0, tk.END)
+                reason_box.delete(0, tk.END)
+                id_box.focus_set()
+                return
+                
+        
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                editpath=home_dir+"/.rmp-data/data/"+id+".rmp"
+                command = ["gedit", "-s", editpath]
+                subprocess.call(command)
+                info="[手動編集]（内容と理由:"+reason+"）"
+                command2 = ["rusemanu", str(id), str(name), str(info)]
+                subprocess.call(command2)
+                messagebox.showinfo("完了","完了しました")
+                id_box.delete(0, tk.END)
+                name_box.delete(0, tk.END)
+                reason_box.delete(0, tk.END)
+                id_box.focus_set()
+
+        else:
+                messagebox.showerror("失敗","試薬が見つかりませんでした")
+
+
+
+        
+#入力ウィンドウ
+rmanuwindow = tk.Tk()
+rmanuwindow.title('データ手動修正')
+rmanuwindow.geometry('600x500')
+rmanuwindow.resizable(width=False, height=False) 
+
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rmanuwindow.tk.call('wm', 'iconphoto', rmanuwindow, img)
+
+
+id_lbl = tk.Label(font=("System",20), text='試薬ID(listでリスト)  …')
+id_lbl.place(x=10, y=30)
+id_box = ttk.Entry(font=("System",20))
+id_box.bind("<Return>", lambda event: boxsearchp())
+id_box.bind("<KP_Enter>", lambda event: boxsearchp())
+id_box.place(x=325, y=33, width=200, height=40)
+
+idsearch_button = tk.Button(rmanuwindow, text='検索', font=("System",12), command=searchp)
+idsearch_button.bind("<Return>", lambda event: searchp())
+idsearch_button.bind("<KP_Enter>", lambda event: searchp())
+idsearch_button.place(x=530, y=33, width=50, height=40)
+
+home_dir=os.environ['HOME']
+nrmp_f = open(home_dir+"/.rmp-data/other/namelist.nrmp", 'r')
+nrmp_data=nrmp_f.readlines()
+nrmp_f.close()
+nrmp_lines=len(nrmp_data)
+namelist_data=nrmp_data[nrmp_lines-1].strip()
+namelist = namelist_data.split(',')
+name_lbl = tk.Label(font=("System",20), text='名前   ……………………')
+name_lbl.place(x=10, y=70)
+style = ttk.Style()
+style.configure('Main.TCombobox', arrowsize=20)
+name_box = ttk.Combobox(master=rmanuwindow, style="Main.TCombobox", font=("System", 20), values=namelist)
+name_box.bind("<Return>", lambda event: reason_box.focus_set())
+name_box.bind("<KP_Enter>", lambda event: reason_box.focus_set())
+name_box.place(x=325, y=73, width=200, height=40)
+
+reason_lbl = tk.Label(font=("System",20), text='変更内容と理由   ………')
+reason_lbl.place(x=10, y=110)
+reason_box = ttk.Entry(font=("System",20))
+reason_box.place(x=325, y=113, width=200, height=40)
+
+register_button = tk.Button(rmanuwindow, text='編集開始', font=("System",20), command=execp)
+register_button.bind("<Return>", lambda event: execp())
+register_button.bind("<KP_Enter>", lambda event: execp())
+register_button.place(x=200, y=440, width=200, height=40)
+
+idsearch_button.lift()
+id_box.focus_set()
+
+rmanuwindow.bind("<Shift-Return>", lambda event: execp())
+
+rmanuwindow.mainloop()
+

@@ -1,0 +1,40 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Finish Reagent
+# 書式: rfin 試薬ID
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+
+echo "--------------------------------------------------"
+echo "\e[34m====試薬終了登録====\e[0m"
+
+id=$1
+
+if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+    echo "試薬がありました(ID: $1)"
+
+    greped_data=`grep "$id," ~/.rmp-data/reagent-list.lrmp`
+
+
+    begin="[9m"
+    end="[0m"
+    erased_data="$begin""$greped_data""$end"
+
+    sed -i -e "s?$greped_data?$erased_data?g" ~/.rmp-data/reagent-list.lrmp
+
+    mv ~/.rmp-data/data/$id.rmp ~/.rmp-data/data/$id.frmp
+
+    echo "終了登録が完了しました(ID: $id)"
+    echo ""
+    echo "試薬瓶の廃棄を行ってください"
+
+else
+    echo "試薬が見つかりませんでした(ID: $1)"
+fi
+
+echo "--------------------------------------------------"

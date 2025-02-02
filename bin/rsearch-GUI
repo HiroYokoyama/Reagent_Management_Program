@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RSEARCH GUI
+# 
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+import os
+import tkinter as tk
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+
+def search():
+        #データ入力
+        keyword=keyword_box.get()
+        #keyword=keyword.replace(' ', '_')
+        if finedrea.get():
+                finrea = "TRUE"
+        else:
+                finrea = "FALSE"
+        command = ["rsearch", str(keyword), str(finrea)]
+        subprocess.call(command)
+        keyword_box.focus_set()
+
+
+        
+#入力ウィンドウ
+rsearwindow = tk.Tk()
+rsearwindow.title('試薬検索')
+rsearwindow.geometry('600x500')
+rsearwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rsearwindow.tk.call('wm', 'iconphoto', rsearwindow, img)
+
+description_lbl = tk.Label(font=("System",15), text='キーワードは試薬ID・試薬名・CAS・入庫日が可能です')
+description_lbl.place(x=10, y=30)
+
+keyword_lbl = tk.Label(font=("System",20), text='キーワード   ………………')
+keyword_lbl.place(x=10, y=105)
+keyword_box = ttk.Entry(font=("System",20))
+keyword_box.place(x=350, y=108, width=200, height=40)
+
+finedrea = tk.BooleanVar()
+finedrea.set(False)
+
+finedrea_check=tk.Checkbutton(rsearwindow, text="終了済み試薬も含めて検索",font=("System",15),variable=finedrea)
+finedrea_check.place(x=10, y=300, height=40)
+
+search_botton = tk.Button(rsearwindow, text='検索', font=("System",20), command=search)
+search_botton.place(x=200, y=440, width=200, height=40)
+
+keyword_box.focus_set()
+
+rsearwindow.bind('<Return>',  lambda event:search())
+rsearwindow.bind('<KP_Enter>',  lambda event:search())
+rsearwindow.bind("<Shift-Return>", lambda event: search())
+
+rsearwindow.mainloop()
+

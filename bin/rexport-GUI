@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# EXPORT GUI
+# 
+#
+# version 2.6.3 (2022.08.18)
+#####
+
+import os
+import sys
+import tkinter as tk
+import subprocess
+
+from tkinter import messagebox
+from tkinter import PhotoImage
+from tkinter import filedialog
+
+
+def export():
+        #データ入力
+        id=id_box.get()
+        if not id:
+                destination=path_box.get()
+                if os.path.exists(destination+"/EXPORT"):
+                        messagebox.showerror("失敗","ディレクトリがすでに存在しています  削除するか別のパスを指定してください")
+                        path_box.focus_set()
+                        return
+                if not os.path.exists(destination):
+                        messagebox.showerror("失敗","宛先ディレクトリがありません")
+                        path_box.focus_set()
+                        return
+        else:
+                destination=path_box.get()
+                if not os.path.exists(destination):
+                        messagebox.showerror("失敗","宛先ディレクトリがありません")
+                        path_box.focus_set()
+                        return
+
+        if shitei.get():
+                id=id_box.get()
+                if not id:
+                        messagebox.showerror("失敗","試薬IDを入力してください")
+                        id_box.focus_set()
+                        return
+                command = ["rexport",destination,id]
+                subprocess.call(command)
+                messagebox.showinfo("完了","完了しました")
+                id_box.delete(0, tk.END)
+        else:
+                command0 = ["rmnglog", "=== step2_execution ==="]
+                subprocess.call(command0)
+                command = ["rexport",destination]
+                subprocess.call(command)
+                command2 = ["rmnglog", "=== step2_completed ==="]
+                subprocess.call(command2)
+                messagebox.showinfo("完了","完了しました")
+
+def askdirp():
+        folderpath = filedialog.askdirectory(initialdir="~")
+        path_box.delete(0,tk.END)
+        path_box.insert(0,folderpath)
+        if not path_box.get():
+                home_dir=os.environ['HOME']
+                path_box.insert(0, home_dir)
+
+
+def enableidbox():
+        if shitei.get():
+                id_box["state"]=tk.NORMAL
+                id_lbl["state"]=tk.NORMAL
+        else:
+                id_box.delete(0, tk.END)
+                id_box["state"]=tk.DISABLED
+                id_lbl["state"]=tk.DISABLED
+
+
+        
+
+
+
+#入力ウィンドウ
+rexportwindow = tk.Tk()
+rexportwindow.title('Step 2. エクスポート')
+rexportwindow.geometry('600x500')
+rexportwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rexportwindow.tk.call('wm', 'iconphoto', rexportwindow, img)
+
+description_lbl = tk.Label(font=("System",15), text='WindowsのExcelで読めるように変換します．')
+description_lbl.place(x=10, y=30)
+
+
+path_lbl=tk.Label(font=("System",17), text='保存先   ……')
+path_lbl.place(x=20, y=100)
+path_box=tk.Entry(font=("System",17))
+path_box.place(x=180, y=100,width=340)
+home_dir=os.environ['HOME']
+path_box.insert(0, home_dir)
+path_btn=tk.Button(rexportwindow, text='参照', font=("System",12), command=askdirp)
+path_btn.place(x=530, y=100)
+
+shitei = tk.BooleanVar()
+shitei.set(False)
+shitei_check=tk.Checkbutton(rexportwindow, text="特定のデータをエクスポート(試薬棚卸し以外用)",font=("System",15),variable=shitei,command=enableidbox)
+shitei_check.place(x=10, y=250, height=40)
+
+id_lbl = tk.Label(font=("System",15), text='試薬ID(listで試薬リスト)   ……')
+id_lbl.place(x=80, y=305)
+id_lbl["state"]=tk.DISABLED
+id_box = tk.Entry(font=("System",15))
+id_box.place(x=380, y=308, width=150, height=30)
+id_box["state"]=tk.DISABLED
+
+if sys.argv[1]=="shitei":
+        shitei.set(True)
+        id_box["state"]=tk.NORMAL
+        id_lbl["state"]=tk.NORMAL
+
+rexportwindow.bind("<Shift-Return>", lambda event: export())
+
+exec_botton = tk.Button(rexportwindow, text='実行', font=("System",20), command=export)
+exec_botton.place(x=200, y=440, width=200, height=40)
+
+rexportwindow.mainloop()
+

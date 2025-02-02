@@ -1,0 +1,13 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Run from application icon
+#
+# version 2.4.1 (2021.8.29)
+#####
+
+path_data="`cat ~/.rmp-data/other/system/path`"
+export PATH=$path_data:$PATH
+
+rmp

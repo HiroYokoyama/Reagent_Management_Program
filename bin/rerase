@@ -1,0 +1,53 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Erase last data
+# 書式: rerase 試薬ID 名前 理由
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+echo "--------------------------------------------------"
+echo "\e[34m====試薬使用記録取り消し====\e[0m"
+
+id=$1
+
+if [ -L ~/.rmp-data/data/$id.rmp ] ; then
+    id_path=`readlink -n ~/.rmp-data/data/$id.rmp`
+    id_tmp=`basename $id_path`
+    id=${id_tmp%.rmp}
+fi
+
+if [ -e ~/.rmp-data/data/$id.rmp ] ; then
+    echo "試薬がありました(ID: $1)"
+    head -n 1 ~/.rmp-data/data/$id.rmp | tr "," "\t"
+    name=$2
+    reason=$3
+
+    previous_data=`tail -n1 ~/.rmp-data/data/$id.rmp`
+    begin="[9m"
+    end="[0m"
+    erased_data="$begin""$previous_data""$end"
+
+    sed -i -e "s?$previous_data?$erased_data?g" ~/.rmp-data/data/$id.rmp
+
+
+    echo "`date "+%Y/%m/%d %H:%M:%S"`,$name,-,-,-,`echo "↑を削除（理由:$3）"`" >> ~/.rmp-data/data/$id.rmp
+
+    echo ""
+    echo ""
+    echo "記載内容↓"
+    echo ""
+
+    label="\e[4m\e[1m日付,使用者名,使用前[g],使用後[g],使用量[g],備考\e[0m \n"
+    data=`tail -n3 ~/.rmp-data/data/$id.rmp`
+    echo "$label$data" | column -s, -t
+
+    echo ""
+    echo ""
+    echo "完了しました"
+else
+    echo "試薬が見つかりませんでした(ID: $id)"
+fi
+echo "--------------------------------------------------"

@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RMANUSE GUI
+# 
+#
+# version 2.5.6 (2021.11.04)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+
+def searchp():
+        id=id_box.get()
+
+        command = ["rsum", str(id)]
+        subprocess.call(command)
+
+def boxsearchp():
+        #move focus and search
+        home_dir=os.environ['HOME']
+        id=id_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                after_box.focus_set()
+                searchp()
+        else:
+                searchp()
+
+def registeruse():
+        #データ入力
+        id=id_box.get()
+        name="-"
+        before="-"
+        after=after_box.get()
+        used="-"
+        info="[試薬管理]"
+
+        if not id:
+                messagebox.showerror("失敗","試薬IDを入力してください")
+                id_box.focus_set()
+                return
+                
+
+        if not after:
+                messagebox.showerror("失敗","現状質量を入力してください")
+                after_box.focus_set()
+                return
+        else:
+                try:
+                        float(after)
+
+                except ValueError:
+                        messagebox.showerror("失敗","現状質量が不正のようです(数字を入力してください)")
+                        return
+
+
+
+        command = ["ruse", str(id), str(name), str(before), str(after), str(used), str(info)]
+        subprocess.call(command)
+
+
+
+		
+        home_dir=os.environ['HOME']
+        
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                messagebox.showinfo("完了","完了しました")
+                id_box.delete(0, tk.END)
+                after_box.delete(0, tk.END)
+                id_box.focus_set()
+
+                command2 = ["rmnglog", str(id), str(after)]
+                subprocess.call(command2)
+
+        else:
+                messagebox.showerror("失敗","試薬が見つかりませんでした")
+                id_box.focus_set()
+
+
+        
+#入力ウィンドウ
+rmngusewindow = tk.Tk()
+rmngusewindow.title('Step 1. 試薬管理質量登録')
+rmngusewindow.geometry('600x500')
+rmngusewindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rmngusewindow.tk.call('wm', 'iconphoto', rmngusewindow, img)
+
+
+
+id_lbl = tk.Label(font=("System",20), text='試薬ID   …………………')
+id_lbl.place(x=10, y=30)
+id_box = ttk.Entry(font=("System",20))
+id_box.bind("<Return>", lambda event: boxsearchp())
+id_box.bind("<KP_Enter>", lambda event: boxsearchp())
+id_box.place(x=325, y=33, width=200, height=40)
+
+idsearch_botton = tk.Button(rmngusewindow, text='検索', font=("System",12), command=searchp)
+idsearch_botton.bind("<Return>", lambda event: searchp())
+idsearch_botton.bind("<KP_Enter>", lambda event: searchp())
+idsearch_botton.place(x=530, y=33, width=50, height=40)
+
+
+
+after_lbl = tk.Label(font=("System",20), text='単位なし現状質量[g]  …')
+after_lbl.place(x=10, y=70)
+after_box = ttk.Entry(font=("System",20))
+after_box.place(x=325, y=73, width=200, height=40)
+
+
+register_botton = tk.Button(rmngusewindow, text='登録', font=("System",20), command=registeruse)
+register_botton.bind("<Return>", lambda event: registeruse())
+register_botton.bind("<KP_Enter>", lambda event: registeruse())
+register_botton.place(x=200, y=440, width=200, height=40)
+
+
+idsearch_botton.lift()
+id_box.focus_set()
+
+rmngusewindow.bind("<Shift-Return>", lambda event: registeruse())
+
+rmngusewindow.mainloop()
+

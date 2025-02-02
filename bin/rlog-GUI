@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RLOG GUI
+# 
+#
+# version 2.5.6 (2021.11.04)
+#####
+
+import os
+import tkinter as tk
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+
+def view():
+        #データ入力
+        id=id_box.get()
+        
+        if not id:
+                messagebox.showerror("失敗","試薬IDを入力してください")
+                return
+        
+
+        if finedlog.get():
+                command = ["rlogf", str(id)]
+                subprocess.call(command)
+                id_box.delete(0, tk.END)
+                id_box.focus_set()
+
+        else:
+                command = ["rlog", str(id)]
+                subprocess.call(command)
+                id_box.delete(0, tk.END)
+                id_box.focus_set()
+
+
+        
+#入力ウィンドウ
+rviewwindow = tk.Tk()
+rviewwindow.title('使用記録閲覧')
+rviewwindow.geometry('600x500')
+rviewwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rviewwindow.tk.call('wm', 'iconphoto', rviewwindow, img)
+
+description_lbl = tk.Label(font=("System",15), text='使用記録を確認します')
+description_lbl.place(x=10, y=30)
+
+id_lbl = tk.Label(font=("System",20), text='試薬ID   ……………………')
+id_lbl.place(x=10, y=110)
+id_box = ttk.Entry(font=("System",20))
+id_box.place(x=350, y=113, width=200, height=40)
+
+finedlog = tk.BooleanVar()
+finedlog.set(False)
+
+finedlog_check=tk.Checkbutton(rviewwindow, text="終了済み試薬を検索",font=("System",15),variable=finedlog)
+finedlog_check.place(x=10, y=300, height=40)
+
+search_botton = tk.Button(rviewwindow, text='検索', font=("System",20), command=view)
+search_botton.place(x=200, y=440, width=200, height=40)
+
+id_box.focus_set()
+
+rviewwindow.bind('<Return>',  lambda event:view())
+rviewwindow.bind('<KP_Enter>',  lambda event:view())
+rviewwindow.bind('<Shift-Return>',  lambda event:view())
+
+rviewwindow.mainloop()
+

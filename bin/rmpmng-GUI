@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# MANAGEMENT DAY MAIN 
+# 
+#
+# version 2.6.3 (2022.08.18)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import PhotoImage
+from tkinter import messagebox
+
+def runprog(func):
+        first_button["state"]=tk.DISABLED
+        second_button["state"]=tk.DISABLED
+        fourth_button["state"]=tk.DISABLED
+        ikkatsushori_button["state"]=tk.DISABLED
+        mmwindow.after(1,func)
+
+def enable_button():
+        mmwindow.after(1,enable_buttonp)
+
+def enable_buttonp():
+        first_button["state"]=tk.NORMAL
+        second_button["state"]=tk.NORMAL
+        fourth_button["state"]=tk.NORMAL
+        ikkatsushori_button["state"]=tk.NORMAL
+
+def step1():
+        #rmanuse-GUI
+        print("~~~~~~~~~~~~~~~~      rmnguse     ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rmnguse-GUI"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~  rmnguse_closed  ~~~~~~~~~~~~~~~~")
+        print()
+
+def ikkatsushori():
+        question = tk.messagebox.askquestion('Step 1. 一括登録','質量を登録せずにStep 1を行います  一年に一回ぐらいは手動で行いましょう  本当に実行しますか？', icon='warning')
+
+        
+        if question == 'yes':
+                subprocess.call(["rmnguseall","CONFIRM"])
+                tk.messagebox.showinfo('完了','完了しました')
+
+def step2():
+        #rexport
+        print("~~~~~~~~~~~~~~~~      rexport     ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rexport-GUI", "none"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~  rexport_closed  ~~~~~~~~~~~~~~~~")
+        print()
+    
+def step4():
+        #move files
+        print("~~~~~~~~~~~~~~~~      rfinmv      ~~~~~~~~~~~~~~~~")
+        question = tk.messagebox.askquestion('Step 4. 実行確認','登録が完了してから実行してください．実行しますか？', icon='warning')
+        
+
+        
+        if question == 'yes':
+        
+                subprocess.call(["rfinmv","CONFIRM"])
+                print()
+                command2 = ["rmnglog", "=== step4_executed  ==="]
+                subprocess.call(command2)
+                
+                
+        print("~~~~~~~~~~~~~~~~   rfinmv_closed  ~~~~~~~~~~~~~~~~")
+        print()
+
+        if question == 'yes':
+                tk.messagebox.showinfo('完了','試薬棚卸お疲れ様です．')
+                mmwindow.destroy()
+
+             
+
+
+#main window
+mmwindow = tk.Tk()
+mmwindow.title('試薬棚卸')
+mmwindow.geometry('600x450')
+mmwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+mmwindow.tk.call('wm', 'iconphoto', mmwindow, img)
+
+
+first_lbl = tk.Label(font=("System",15), text='Step 1. 試薬管理登録(質量を測って登録します)                     ')
+first_lbl.grid(row=0, column=0, padx=15, pady=10)
+
+
+first_button = tk.Button(mmwindow, text='Step 1', font=("System",15), command=lambda: runprog(step1))
+first_button.bind("<Return>", lambda event: runprog(step1))
+first_button.bind("<KP_Enter>", lambda event: runprog(step1))
+first_button.grid(row=1, column=0, padx=15, pady=10)
+
+ikkatsushori_button = tk.Button(mmwindow, text='一括登録', font=("System",15), command=ikkatsushori)
+ikkatsushori_button.place(x=450, y=64)
+
+second_lbl = tk.Label(font=("System",15), text='Step 2. エクスポート(データを取り出します)                        ')
+second_lbl.grid(row=2, column=0, padx=15, pady=10)
+
+second_button = tk.Button(mmwindow, text='Step 2', font=("System",15), command=lambda: runprog(step2))
+second_button.bind("<Return>", lambda event: runprog(step2))
+second_button.bind("<KP_Enter>", lambda event: runprog(step2))
+second_button.grid(row=3, column=0, padx=15, pady=10)
+
+fourth_lbl = tk.Label(font=("System",15), text='Step 3. 別のシステムに登録                                       ')
+fourth_lbl.grid(row=4, column=0, padx=15, pady=10)
+
+fourth_lbl = tk.Label(font=("System",15), text='Step 4. 終了試薬データアーカイブ(終了試薬のデータ移動)')
+fourth_lbl.grid(row=5, column=0, padx=15, pady=10)
+
+fourth_button = tk.Button(mmwindow, text='Step 4', font=("System",15), command=step4)
+fourth_button.bind("<Return>", lambda event: step4())
+fourth_button.bind("<KP_Enter>", lambda event: step4())
+fourth_button.grid(row=6, column=0, padx=15, pady=10)
+
+
+mmwindow.mainloop()
+

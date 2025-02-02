@@ -1,0 +1,85 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# 
+# 書式: ramount ID
+# 試薬残量表示プログラム
+# version 2.6.1 (2022.05.21)
+#####
+
+id=$1
+
+kowake_check=`head -n 1 ~/.rmp-data/data/$id.rmp | tr ',' '\n' | sed -n 5P  | sed "s/ //g"`
+kowake_check2=`head -n 1 ~/.rmp-data/data/$id.rmp | tr ',' '\n' | sed -n 6P  | sed "s/ //g"`
+if [ $kowake_check = "入庫日:小分け" -o $kowake_check = "入庫日:補充用"  ] ; then
+    exit
+elif [ $kowake_check2 = "入庫日:小分け" -o $kowake_check2 = "入庫日:補充用"  ] ; then
+    exit
+fi
+
+echo ""
+echo ""
+
+    reaamount=`head -n 1 ~/.rmp-data/data/$id.rmp | tr ',' '\n' | sed -n 3P | sed -e "s/容量://g"`
+    amount_num=`echo $reaamount | sed -e "s/[^0-9]//g" | sed "s/ //g"`
+    amount_unit=`echo $reaamount | sed -e "s/$amount_num//g" | sed "s/ //g"`
+    if [ $amount_unit = "mL" -o $amount_unit = "ml" -o $amount_unit = "ｍL" -o $amount_unit = "ｍｌ" ] ; then
+        readens=`sed -n 2P ~/.rmp-data/data/$id.rmp  | tr ',' '\n' | sed -n 2P | sed "s/ //g"`
+        if [ $readens = "-" ] ; then
+            echo -n "合計使用量: ? g   "
+            echo "残量: ? g (? %)"
+            exit
+        fi
+        amount_gram=`echo "scale=2; $amount_num * $readens" | bc`
+    elif  [ $amount_unit = "L" -o $amount_unit = "l" -o $amount_unit = "ｌ"  ] ; then
+        readens=`sed -n 2P ~/.rmp-data/data/$id.rmp  | tr ',' '\n' | sed -n 2P | sed "s/ //g"`
+        if [ $readens = "-" ] ; then
+            echo -n "合計使用量: ? g   "
+            echo "残量: ? g (? %)"
+            exit
+        fi
+        amount_gram=`echo "scale=2; $amount_num * $readens * 1000" | bc`
+    elif  [ $amount_unit = "g" -o $amount_unit = "G" -o $amount_unit = "ｇ" ] ; then
+        amount_gram=$amount_num
+    elif  [ $amount_unit = "kg" -o $amount_unit = "KG"  -o $amount_unit = "ｋｇ"  ] ; then
+        amount_gram=$((amount_num*1000))
+    else
+            echo -n "合計使用量: ? g   "
+            echo "残量: ? g (? %)"
+            exit
+    fi
+    amount_gram=`echo "scale=0; $amount_gram / 1" | bc`
+    init_weight=`sed -n 5P ~/.rmp-data/data/$id.rmp  | tr ',' '\n' | sed -n 4P | sed "s/ //g"`
+    last_weight=`tail -n1 ~/.rmp-data/data/$id.rmp  | tr ',' '\n' | sed -n 4P | sed "s/ //g"`
+    if [ $init_weight = "-"  ] ; then
+        echo -n "合計使用量: ? g   "
+        echo "残量: ? g (? %)"
+        exit
+    fi
+    
+    if  [ $last_weight = "-"  ] ; then
+    num=0
+        while [ $last_weight = "-"  ] ; do
+            num=`expr $num + 1`
+            last_weight=`tail -n $num ~/.rmp-data/data/$id.rmp  | tr ',' '\n' | sed -n 4P | sed "s/ //g"`
+            if  [ $last_weight = "使用後[g]"  ] ; then
+                echo -n "合計使用量: ? g   "
+                echo "残量: ? g (? %)"
+                exit
+            fi
+        done
+    fi
+    
+    total_used_amount=`echo "scale=1; $init_weight-$last_weight" | bc`
+    if [ `echo "$total_used_amount <= 0" | bc` = 1 ] ; then
+        remaining_amount=$amount_gram
+        parcentage=100
+    else 
+        remaining_amount=`echo "scale=1; $amount_gram-$total_used_amount" | bc`
+        parcentage=`echo "scale=2; $remaining_amount / $amount_gram * 100" | bc`
+        parcentage=`echo "scale=0; $parcentage / 1" | bc`
+    fi
+    echo -n "合計使用量: $total_used_amount g   "
+    echo "残量: $remaining_amount g ($parcentage %)"
+

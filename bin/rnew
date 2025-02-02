@@ -1,0 +1,46 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Add New Reagent
+# 書式: rnew 試薬名 容量 CAS 比重 入庫日 試薬庫 初期重量 備考 会社・等級・Lot.
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+
+
+echo "--------------------------------------------------"
+echo "\e[34m====新規試薬登録====\e[0m"
+id=$(cat ~/.rmp-data/other/system/nextid)
+nextid=$(expr $id + 1)
+echo "試薬IDを発行しました．試薬ID: $id"
+rname=$1
+amount=$2
+cas=$3
+density=$4 
+rdate=$5
+storage=$6
+init_weight=$7
+note=$8
+maker=$9
+
+echo "ID:$id,$rname,容量:$amount,CAS:$cas,メーカー/等級/Lot.:$maker,入庫日:$rdate,$note,試薬庫:$storage" >>  ~/.rmp-data/data/$id.rmp
+echo "d=,$density,g/mL" >>  ~/.rmp-data/data/$id.rmp
+echo "" >>  ~/.rmp-data/data/$id.rmp
+echo "日付,使用者名,使用前[g],使用後[g],使用量[g],備考"  >>  ~/.rmp-data/data/$id.rmp
+echo "`date "+%Y/%m/%d %H:%M:%S"`,-,-,$init_weight,-,"[新規登録]"" >> ~/.rmp-data/data/$id.rmp
+echo "$id,$rname ($amount),$cas,$rdate,$storage" >> ~/.rmp-data/reagent-list.lrmp
+echo "登録が完了しました($id,$rname)"
+mv ~/.rmp-data/other/system/nextid ~/.rmp-data/other/system/nextid.old
+printf "%05d" "${nextid}" > ~/.rmp-data/other/system/nextid
+echo ""
+echo ""
+
+#check rmp server
+if [ -e  ~/.rmp-data/other/system/server_status ]; then
+    status=`cat ~/.rmp-data/other/system/server_status`
+    if [ $status = "ACTIVE" ]; then
+        chmod 666 ~/.rmp-data/data/$id.rmp
+    fi
+fi

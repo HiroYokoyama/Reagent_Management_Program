@@ -1,0 +1,14 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Update database
+#
+# version 2.4.10 (2021.10.07)
+#####
+
+echo "Reagent Manage Program データベースをupdateします(2.4.9 -> 2.4.10)"
+
+echo "Nothing to do."
+
+echo "完了"

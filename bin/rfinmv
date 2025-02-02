@@ -1,0 +1,37 @@
+#!/bin/dash
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# Move Finished Reagent Data
+# 書式: rfinmv "CONFIRM"
+#
+# version 2.6.1 (2022.05.21)
+#####
+
+if [ ! $1 =  "CONFIRM" ]; then
+ echo "Invalid Argument"
+ exit
+elif [ "$1" = "" ]; then
+ echo "Invalid Argument"
+ exit
+fi
+
+echo "--------------------------------------------------"
+echo "\e[34m====終了試薬データ移動====\e[0m"
+
+cd ~/.rmp-data/data/
+ls ./*.frmp > /dev/null 2>&1
+
+if [ $? -ne 0 ]; then
+    :
+else
+ for fn in *.frmp
+ do
+   mv $fn ~/.rmp-data/data/finished/
+   chmod 444 ~/.rmp-data/data/finished/$fn
+ done
+fi
+
+echo "完了しました．試薬管理お疲れ様です．"
+
+echo "--------------------------------------------------"

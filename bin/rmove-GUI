@@ -1,0 +1,201 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# RMOVE GUI
+# 
+#
+# version 2.6.0 (2022.03.15)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import messagebox
+from tkinter import ttk
+from tkinter import PhotoImage
+
+
+def searchp():
+        id=id_box.get()
+
+        command = ["rsum", str(id)]
+        subprocess.call(command)
+
+def boxsearchp():
+        #move focus and search
+        home_dir=os.environ['HOME']
+        id=id_box.get()
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                name_box.focus_set()
+                searchp()
+        else:
+                searchp()
+
+def registerp():
+        #データ入力
+        id=id_box.get()
+        name=name_box.get()
+        note=note_box.get()
+        storage=storage_box.get()
+
+        if not id:
+                messagebox.showerror("失敗","試薬IDを入力してください")
+                id_box.focus_set()
+                return
+        
+        if not name:
+                messagebox.showerror("失敗","名前を入力してください")
+                name_box.focus_set()
+                return
+        else:
+                name=name.replace(':', '_')
+                name=name.replace(';', '_')
+                name=name.replace('\'', '_')
+                name=name.replace('\"', '_')
+                name=name.replace(',', '_')
+                name=name.replace('\\', '_')
+                name=name.replace('?', '？')
+                name=name.replace(',', '_')
+                name=name.replace('[', '_')
+                name=name.replace(']', '_')
+                name=name.replace('*', '_')
+                name=name.strip()
+
+        if not note:
+                note='-'
+        else:
+                note=note.replace(':', '_')
+                note=note.replace(';', '_')
+                note=note.replace('\'', '_')
+                note=note.replace('\"', '_')
+                note=note.replace(',', '_')
+                note=note.replace('\\', '_')
+                note=note.replace('?', '？')
+                note=note.replace(',', '_')
+
+        if not storage:
+                messagebox.showerror("失敗","移動先の試薬庫を入力してください")
+                storage_box.focus_set()
+                return
+        else:
+                storage=storage.replace(':', '_')
+                storage=storage.replace(';', '_')
+                storage=storage.replace('\'', '_')
+                storage=storage.replace('\"', '_')
+                storage=storage.replace(',', '_')
+                storage=storage.replace('\\', '_')
+                storage=storage.replace('?', '？')
+                storage=storage.replace(',', '_')
+
+        home_dir=os.environ['HOME']
+        if os.path.islink(home_dir+"/.rmp-data/data/"+id+".rmp") == True:
+                messagebox.showerror("失敗","移動するには正式な試薬IDを入力してください")
+                id_box.focus_set()
+                return
+
+
+        command = ["rmove", str(id), str(name), str(storage), str(note)]
+        subprocess.call(command)
+
+        
+        home_dir=os.environ['HOME']
+        
+        if os.path.exists(home_dir+"/.rmp-data/data/"+id+".rmp"):
+                messagebox.showinfo("移動完了","移動が完了しました")
+                id_box.delete(0, tk.END)
+                name_box.delete(0, tk.END)
+                storage_box.delete(0, tk.END)
+                note_box.delete(0, tk.END)
+                id_box.focus_set()
+
+        else:
+                messagebox.showerror("失敗","試薬が見つかりませんでした")
+                id_box.focus_set()
+
+
+
+        
+#入力ウィンドウ
+rmovewindow = tk.Tk()
+rmovewindow.title('試薬移動')
+rmovewindow.geometry('600x500')
+rmovewindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+rmovewindow.tk.call('wm', 'iconphoto', rmovewindow, img)
+
+
+id_lbl = tk.Label(font=("System",20), text='試薬ID   …………………')
+id_lbl.place(x=10, y=30)
+id_box = ttk.Entry(font=("System",20))
+id_box.bind("<Return>", lambda event: boxsearchp())
+id_box.bind("<KP_Enter>", lambda event: boxsearchp())
+id_box.place(x=325, y=33, width=200, height=40)
+
+idsearch_button = tk.Button(rmovewindow, text='検索', font=("System",12), command=searchp)
+idsearch_button.bind("<Return>", lambda event: searchp())
+idsearch_button.bind("<KP_Enter>", lambda event: searchp())
+idsearch_button.place(x=530, y=33, width=50, height=40)
+
+home_dir=os.environ['HOME']
+nrmp_f = open(home_dir+"/.rmp-data/other/namelist.nrmp", 'r')
+nrmp_data=nrmp_f.readlines()
+nrmp_f.close()
+nrmp_lines=len(nrmp_data)
+namelist_data=nrmp_data[nrmp_lines-1].strip()
+namelist = namelist_data.split(',')
+name_lbl = tk.Label(font=("System",20), text='名前   ……………………')
+name_lbl.place(x=10, y=70)
+style = ttk.Style()
+style.configure('Main.TCombobox', arrowsize=20)
+name_box = ttk.Combobox(master=rmovewindow, style="Main.TCombobox", font=("System", 20), values=namelist)
+name_box.bind("<Return>", lambda event:storage_box.focus_set())
+name_box.bind("<KP_Enter>", lambda event: storage_box.focus_set())
+name_box.place(x=325, y=73, width=200, height=40)
+
+storage_lbl = tk.Label(font=("System",20), text='移動先の試薬庫   ………')
+storage_lbl.place(x=10, y=110)
+
+style = ttk.Style()
+style.configure('Main.TCombobox', arrowsize=20)
+
+home_dir=os.environ['HOME']
+srmp_f = open(home_dir+"/.rmp-data/other/shiyakuko.srmp", 'r')
+srmp_data=srmp_f.readlines()
+srmp_f.close()
+srmp_lines=len(srmp_data)
+shiyakuko_data=srmp_data[srmp_lines-1].strip()
+shiyakuko_list = shiyakuko_data.split(',')
+
+storage_box = ttk.Combobox(master=rmovewindow, style="Main.TCombobox", font=("System", 20), values=shiyakuko_list)
+storage_box.place(x=325, y=113, width=200, height=40)
+storage_box.bind("<Return>", lambda event: note_box.focus_set())
+storage_box.bind("<KP_Enter>", lambda event: note_box.focus_set())
+
+note_lbl = tk.Label(font=("System",20), text='備考   ……………………')
+note_lbl.place(x=10, y=150)
+note_box = ttk.Entry(font=("System",20))
+note_box.place(x=325, y=153, width=200, height=40)
+
+register_button = tk.Button(rmovewindow, text='実行', font=("System",20), command=registerp)
+register_button.bind("<Return>", lambda event: registerp())
+register_button.bind("<KP_Enter>", lambda event: registerp())
+register_button.place(x=200, y=440, width=200, height=40)
+
+
+idsearch_button.lift()
+id_box.focus_set()
+
+rmovewindow.bind("<Shift-Return>", lambda event: registerp())
+
+rmovewindow.mainloop()
+

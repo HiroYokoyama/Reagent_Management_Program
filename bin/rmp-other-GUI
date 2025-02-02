@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+
+#####
+# Reagent Management Program written by H.Yokoyama
+# OTHER GUI
+# 
+#
+# version 2.6.2 (2022.08.18)
+#####
+
+import sys
+import tkinter as tk
+import os
+import subprocess
+
+from tkinter import ttk
+from tkinter import PhotoImage
+from tkinter import messagebox
+
+def runprog(func):
+        reaerase["state"]=tk.DISABLED
+        reamove["state"]=tk.DISABLED
+        reamanual["state"]=tk.DISABLED
+        reaexport["state"]=tk.DISABLED
+        reabackup["state"]=tk.DISABLED
+        otherwindow.after(1,func)
+
+def enable_button():
+        otherwindow.after(1,enable_buttonp)
+
+def enable_buttonp():
+        reaerase["state"]=tk.NORMAL
+        reamove["state"]=tk.NORMAL
+        reamanual["state"]=tk.NORMAL
+        reaexport["state"]=tk.NORMAL
+        reabackup["state"]=tk.NORMAL
+
+def reamovep():
+        #rmpmove-GUI
+        print("~~~~~~~~~~~~~~~~       rmove      ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rmove-GUI"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~   rmove_closed   ~~~~~~~~~~~~~~~~")
+        print()
+    
+
+def reabackupp():
+        #rmpbackup
+        print("~~~~~~~~~~~~~~~~      rbackup     ~~~~~~~~~~~~~~~~")
+        question = tk.messagebox.askquestion('バックアップの実行','バックアップを実行しますか？', icon='question')
+        if question == 'yes':
+                subprocess.call(["rmpbackup"])
+                tk.messagebox.showinfo('バックアップ完了','完了しました．デフォルト保存先：~/RMP-BACKUP/BACKUP_1/')
+                print('バックアップ完了しました')
+        enable_button()
+        print("~~~~~~~~~~~~~~~~  rbackup_closed  ~~~~~~~~~~~~~~~~")
+        print()
+
+def reaerasep():
+        #rexport-GUI
+        print("~~~~~~~~~~~~~~~~      rerase      ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rerase-GUI"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~   rerase_closed  ~~~~~~~~~~~~~~~~")
+        print()
+        
+def reamanualp():
+        #rmanual-GUI
+        print("~~~~~~~~~~~~~~~~     rmanual      ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rmanual-GUI"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~  rmanual_closed  ~~~~~~~~~~~~~~~~")
+        print()
+
+def reaexportp():
+        #rexport
+        print("~~~~~~~~~~~~~~~~      rexport     ~~~~~~~~~~~~~~~~")
+        subprocess.call(["rexport-GUI", "shitei"])
+        enable_button()
+        print("~~~~~~~~~~~~~~~~  rexport_closed  ~~~~~~~~~~~~~~~~")
+        print()
+        
+def reamanualMethod():
+        #rmanualMethod
+        tk.messagebox.showinfo('データ手動修正','本当に必要なときのみ使用してください 記録が残ります．起動は[Ctrl]+[M]')
+        enable_button()
+
+
+
+
+#main window
+otherwindow = tk.Tk()
+otherwindow.title('その他機能')
+otherwindow.geometry('480x200')
+otherwindow.resizable(width=False, height=False) 
+
+home_dir=os.environ['HOME']
+install_info_path=home_dir+"/.rmp-data/other/system/install_path"
+f = open(install_info_path, 'r')
+install_path=f.read()
+f.close()
+icon_path=install_path+"/icon/icon.png"
+img = PhotoImage(file=icon_path) 
+otherwindow.tk.call('wm', 'iconphoto', otherwindow, img)
+
+
+style = ttk.Style()
+style.configure('Main.TButton', font=("System", 17))
+
+reaerase = ttk.Button(otherwindow, text='使用登録取消', style="Main.TButton", width=15, command=lambda: runprog(reaerasep))
+reaerase.bind("<Return>", lambda event: runprog(reaerasep))
+reaerase.bind("<KP_Enter>", lambda event: runprog(reaerasep))
+reaerase.grid(row=0, column=0, padx=15, pady=10)
+
+reamove =  ttk.Button(otherwindow, text='試薬移動', style="Main.TButton", width=15, command=lambda: runprog(reamovep))
+reamove.bind("<Return>", lambda event: runprog(reamovep))
+reamove.bind("<KP_Enter>", lambda event: runprog(reamovep))
+reamove.grid(row=0, column=1, padx=15, pady=10)
+
+reamanual =  ttk.Button(otherwindow, text='データ手動修正', style="Main.TButton", width=15, command=lambda: runprog(reamanualMethod))
+reamanual.bind("<Return>", lambda event: runprog(reamanualMethod))
+reamanual.bind("<KP_Enter>", lambda event: runprog(reamanualMethod))
+reamanual.grid(row=1, column=0, padx=15, pady=10)
+
+reaexport =  ttk.Button(otherwindow, text='エクスポート', style="Main.TButton", width=15, command=lambda: runprog(reaexportp))
+reaexport.bind("<Return>", lambda event: runprog(reaexportp))
+reaexport.bind("<KP_Enter>", lambda event: runprog(reaexportp))
+reaexport.grid(row=1, column=1, padx=15, pady=10)
+
+reabackup =  ttk.Button(otherwindow, text='バックアップ実行', style="Main.TButton", width=15, command=lambda: runprog(reabackupp))
+reabackup.bind("<Return>", lambda event: runprog(reabackupp))
+reabackup.bind("<KP_Enter>", lambda event: runprog(reabackupp))
+reabackup.grid(row=2, column=0, padx=15, pady=10)
+
+otherwindow.bind("<Control-m>", lambda event: runprog(reamanualp))
+
+otherwindow.mainloop()
+
