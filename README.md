@@ -1,4 +1,4 @@
-# Reagent_Management_Program
+# Reagent Management Program
 Reagent Management Program for chemistry laboratories
 
 ## 説明
