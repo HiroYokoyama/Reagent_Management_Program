@@ -4,8 +4,6 @@ Reagent Management Program for chemistry laboratories
 ## 説明
 化学の研究室で使用できる、open sourceの試薬管理プログラムです。
 現状、Shell Scriptを使ってるので、Linux（Ubuntu）でしか動きません。
-プログラミング初心者なので、汚いコードですが、動きはします。
-眠ってるだけではもったいないかつ、更新もされて行かないので。
 
 ## 機能
 - 瓶ごとに固有のIDを付与し、試薬の使用簿を作成
